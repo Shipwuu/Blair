@@ -101,12 +101,6 @@ end
 local function checkCrusedItems()
     local crusedItems = {}
     local crusedItemObjects = {}
-    
-    local ouijaBoard = game:GetService("Workspace"):FindFirstChild("Ouija Board")
-    if ouijaBoard then
-        table.insert(crusedItems, "Ouija Board")
-        crusedItemObjects["Ouija Board"] = ouijaBoard
-    end
 
     local summoningCircle = game:GetService("Workspace"):FindFirstChild("SummoningCircle")
     if summoningCircle then
@@ -134,7 +128,7 @@ else
 
     -- Add billboards and teleport buttons for each found Crused Item
     for itemName, itemObject in pairs(crusedItemObjects) do
-        local color = itemName == "Ouija Board" and Color3.fromRGB(0, 128, 0) or Color3.fromRGB(255, 140, 0)
+        local color = Color3.fromRGB(255, 140, 0)
         addBillboard(itemName, itemObject, itemName, color)
         
         createButton("TpTo" .. itemName, "Teleport to " .. itemName, function()
@@ -243,3 +237,5 @@ else
         Duration = 2
     })
 end
+
+print("halo")
