@@ -9,16 +9,18 @@ local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "BlairScreenGui"
 screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
 
--- Creating the main frame for Blair GUI
-local mainFrame = Instance.new("Frame")
+-- Creating the scrolling frame for Blair GUI
+local mainFrame = Instance.new("ScrollingFrame")
 mainFrame.Name = "MainFrame"
 mainFrame.Parent = screenGui
 mainFrame.AnchorPoint = Vector2.new(0, 0.5)
 mainFrame.Position = UDim2.new(0, 0, 0.5, 0)
 mainFrame.Size = UDim2.new(0.25, 0, 0.25, 0) -- 1/4 of the screen
+mainFrame.CanvasSize = UDim2.new(0, 0, 1.5, 0) -- Adjust this for scrolling
 mainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 mainFrame.BorderSizePixel = 0
 mainFrame.Visible = false -- Start hidden until toggle is pressed
+mainFrame.ScrollBarThickness = 8
 
 -- Adding a title to Blair GUI
 local titleLabel = Instance.new("TextLabel")
@@ -36,13 +38,13 @@ local function createButton(name, text, callback)
     local button = Instance.new("TextButton")
     button.Name = name
     button.Parent = mainFrame
-    button.Size = UDim2.new(0, 150, 0, 50)
-    button.Position = UDim2.new(0.5, -75, 0, 60 + (#mainFrame:GetChildren() - 2) * 60)
+    button.Size = UDim2.new(0.8, 0, 0, 40) -- Reduced button size
+    button.Position = UDim2.new(0.1, 0, 0, 60 + (#mainFrame:GetChildren() - 2) * 50)
     button.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
     button.BorderSizePixel = 0
     button.TextColor3 = Color3.fromRGB(255, 255, 255)
     button.Font = Enum.Font.SourceSans
-    button.TextSize = 18
+    button.TextSize = 16 -- Reduced text size
     button.Text = text
 
     button.MouseButton1Click:Connect(callback)
@@ -225,4 +227,4 @@ if map then
     end)
 end
 
-print("on")
+print("halo")
