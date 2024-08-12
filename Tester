@@ -144,7 +144,26 @@ else
     -- Add billboards and teleport buttons for each found Crused Item
     for itemName, itemObject in pairs(crusedItemObjects) do
         local color = itemName == "Ouija Board" and Color3.fromRGB(0, 128, 0) or (itemName == "Summoning Circle" and Color3.fromRGB(255, 140, 0) or Color3.fromRGB(128, 0, 128))
-        addBillboard(itemName, itemObject, itemName, color)
+        -- Add billboards to Crused Items
+        local billboard = Instance.new("BillboardGui")
+        billboard.Adornee = itemObject
+        billboard.Name = itemName
+        billboard.Size = UDim2.new(0, 100, 0, 50)
+        billboard.StudsOffset = Vector3.new(0, 2, 0)
+        billboard.AlwaysOnTop = true
+        billboard.Parent = itemObject
+
+        local textLabel = Instance.new("TextLabel")
+        textLabel.Parent = billboard
+        textLabel.BackgroundTransparency = 1
+        textLabel.Size = UDim2.new(1, 0, 1, 0)
+        textLabel.Font = Enum.Font.SourceSansBold
+        textLabel.TextSize = 14
+        textLabel.TextColor3 = color
+        textLabel.TextStrokeTransparency = 0
+        textLabel.TextYAlignment = Enum.TextYAlignment.Center
+        textLabel.Text = itemName
+        textLabel.ZIndex = 10
         
         createButton("TpTo" .. itemName, "Teleport to " .. itemName, function()
             game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame = itemObject.CFrame
@@ -160,44 +179,55 @@ game:GetService("Lighting").FogEnd = 100000
 game:GetService("Lighting").GlobalShadows = false
 game:GetService("Lighting").OutdoorAmbient = Color3.fromRGB(128, 128, 128)
 
--- Function to add billboards to objects
-function addBillboard(name, parent, text, color)
-    if parent then
-        local billboard = Instance.new("BillboardGui")
-        billboard.Adornee = parent
-        billboard.Name = name
-        billboard.Size = UDim2.new(0, 100, 0, 50)
-        billboard.StudsOffset = Vector3.new(0, 2, 0)
-        billboard.AlwaysOnTop = true
-        billboard.Parent = parent
-
-        local textLabel = Instance.new("TextLabel")
-        textLabel.Parent = billboard
-        textLabel.BackgroundTransparency = 1
-        textLabel.Size = UDim2.new(1, 0, 1, 0)
-        textLabel.Font = Enum.Font.SourceSansBold
-        textLabel.TextSize = 14
-        textLabel.TextColor3 = color
-        textLabel.TextStrokeTransparency = 0
-        textLabel.TextYAlignment = Enum.TextYAlignment.Center
-        textLabel.Text = text
-        textLabel.ZIndex = 10
-    else
-        warn("Parent object for BillboardGui not found: " .. name)
-    end
-end
-
 local map = workspace:FindFirstChild("Map")
 if map then
     for _, obj in pairs(map.Generators:GetChildren()) do
         if obj.Name == "GeneratorMesh" then
-            addBillboard("Generator", obj, "Generator", Color3.fromRGB(255, 0, 0))
+            -- Add billboards to Generator
+            local billboard = Instance.new("BillboardGui")
+            billboard.Adornee = obj
+            billboard.Name = "Generator"
+            billboard.Size = UDim2.new(0, 100, 0, 50)
+            billboard.StudsOffset = Vector3.new(0, 2, 0)
+            billboard.AlwaysOnTop = true
+            billboard.Parent = obj
+
+            local textLabel = Instance.new("TextLabel")
+            textLabel.Parent = billboard
+            textLabel.BackgroundTransparency = 1
+            textLabel.Size = UDim2.new(1, 0, 1, 0)
+            textLabel.Font = Enum.Font.SourceSansBold
+            textLabel.TextSize = 14
+            textLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
+            textLabel.TextStrokeTransparency = 0
+            textLabel.TextYAlignment = Enum.TextYAlignment.Center
+            textLabel.Text = "Generator"
+            textLabel.ZIndex = 10
         end
     end
 
     for _, obj in pairs(map.Van:GetChildren()) do
         if obj.Name == "SpawnLocation" then
-            addBillboard("Van", obj, "Van", Color3.fromRGB(255, 20, 147))
+            -- Add billboards to Van
+            local billboard = Instance.new("BillboardGui")
+            billboard.Adornee = obj
+            billboard.Name = "Van"
+            billboard.Size = UDim2.new(0, 100, 0, 50)
+            billboard.StudsOffset = Vector3.new(0, 2, 0)
+            billboard.AlwaysOnTop = true
+            billboard.Parent = obj
+
+            local textLabel = Instance.new("TextLabel")
+            textLabel.Parent = billboard
+            textLabel.BackgroundTransparency = 1
+            textLabel.Size = UDim2.new(1, 0, 1, 0)
+            textLabel.Font = Enum.Font.SourceSansBold
+            textLabel.TextSize = 14
+            textLabel.TextColor3 = Color3.fromRGB(255, 20, 147)
+            textLabel.TextStrokeTransparency = 0
+            textLabel.TextYAlignment = Enum.TextYAlignment.Center
+            textLabel.Text = "Van"
+            textLabel.ZIndex = 10
         end
     end
 
@@ -231,37 +261,6 @@ else
     warn("Map not found in Workspace.")
 end
 
--- Adding Orb and Print tracking
-local function trackObject(object, text, color)
-    addBillboard("TrackingGui", object, text, color)
-end
-
-if map then
-    for _, obj in pairs(map.Orbs:GetChildren()) do
-        if obj.Name == "OrbPart" then
-            trackObject(obj, "Orb", Color3.fromRGB(30, 144, 255))
-        end
-    end
-
-    map.Orbs.ChildAdded:Connect(function(child)
-        if child.Name == "OrbPart" then
-            trackObject(child, "Orb", Color3.fromRGB(30, 144, 255))
-        end
-    end)
-
-    -- Updated fingerprint path
-    local fingerprint = map.Prints:FindFirstChild("UV_Hand")
-    if fingerprint then
-        trackObject(fingerprint, "Fingerprint", Color3.fromRGB(75, 0, 130))
-    end
-
-    map.Prints.ChildAdded:Connect(function(child)
-        if child.Name == "UV_Hand" then
-            trackObject(child, "Fingerprint", Color3.fromRGB(75, 0, 130))
-        end
-    end)
-end
-
 -- Instant Proximity Prompt Script (runs immediately)
 local ProximityPromptService = game:GetService("ProximityPromptService")
 
@@ -280,4 +279,4 @@ else
     })
 end
 
-print("halooooo")
+print("halo")
