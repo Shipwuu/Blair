@@ -102,6 +102,12 @@ local function checkCrusedItems()
     local crusedItems = {}
     local crusedItemObjects = {}
 
+    local ouijaBoard = game:GetService("Workspace"):FindFirstChild("Ouija Board")
+    if ouijaBoard then
+        table.insert(crusedItems, "Ouija Board")
+        crusedItemObjects["Ouija Board"] = ouijaBoard
+    end
+
     local summoningCircle = game:GetService("Workspace"):FindFirstChild("SummoningCircle")
     if summoningCircle then
         table.insert(crusedItems, "Summoning Circle")
@@ -137,7 +143,7 @@ else
 
     -- Add billboards and teleport buttons for each found Crused Item
     for itemName, itemObject in pairs(crusedItemObjects) do
-        local color = itemName == "Summoning Circle" and Color3.fromRGB(255, 140, 0) or Color3.fromRGB(128, 0, 128)
+        local color = itemName == "Ouija Board" and Color3.fromRGB(0, 128, 0) or (itemName == "Summoning Circle" and Color3.fromRGB(255, 140, 0) or Color3.fromRGB(128, 0, 128))
         addBillboard(itemName, itemObject, itemName, color)
         
         createButton("TpTo" .. itemName, "Teleport to " .. itemName, function()
@@ -194,6 +200,33 @@ if map then
             addBillboard("Van", obj, "Van", Color3.fromRGB(255, 20, 147))
         end
     end
+
+    -- Adding teleport buttons for Generator and Van
+    createButton("TpToGenerator", "Teleport to Generator", function()
+        local generator = map.Generators:FindFirstChild("GeneratorMesh")
+        if generator then
+            game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame = generator.CFrame
+        else
+            game.StarterGui:SetCore("SendNotification", {
+                Title = "Error",
+                Text = "Generator not found",
+                Duration = 2
+            })
+        end
+    end)
+
+    createButton("TpToVan", "Teleport to Van", function()
+        local van = map.Van:FindFirstChild("SpawnLocation")
+        if van then
+            game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame = van.CFrame
+        else
+            game.StarterGui:SetCore("SendNotification", {
+                Title = "Error",
+                Text = "Van not found",
+                Duration = 2
+            })
+        end
+    end)
 else
     warn("Map not found in Workspace.")
 end
