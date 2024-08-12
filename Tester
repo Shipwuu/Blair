@@ -60,15 +60,42 @@ createButton("SanityCheckButton", "Sanity Check", function()
 end)
 
 createButton("TpToOuijaButton", "TpToOuija", function()
-    game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame = game:GetService("Workspace")["Ouija Board"].CFrame
+    local ouijaBoard = game:GetService("Workspace")["Ouija Board"]
+    if ouijaBoard then
+        game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame = ouijaBoard.CFrame
+    else
+        game.StarterGui:SetCore("SendNotification", {
+            Title = "Error",
+            Text = "Ouija Board not found",
+            Duration = 2
+        })
+    end
 end)
 
 createButton("TpToGeneratorButton", "TpToGenerator", function()
-    game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame = workspace.Map.Generators.GeneratorMesh.CFrame
+    local generator = workspace:FindFirstChild("Map") and workspace.Map.Generators:FindFirstChild("GeneratorMesh")
+    if generator then
+        game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame = generator.CFrame
+    else
+        game.StarterGui:SetCore("SendNotification", {
+            Title = "Error",
+            Text = "Generator not found",
+            Duration = 2
+        })
+    end
 end)
 
 createButton("TpToVanButton", "TpToVan", function()
-    game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame = workspace.Map.Van.SpawnLocation.CFrame
+    local van = workspace:FindFirstChild("Map") and workspace.Map.Van:FindFirstChild("SpawnLocation")
+    if van then
+        game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame = van.CFrame
+    else
+        game.StarterGui:SetCore("SendNotification", {
+            Title = "Error",
+            Text = "Van not found",
+            Duration = 2
+        })
+    end
 end)
 
 -- Set up lighting and other environmental effects
@@ -80,71 +107,85 @@ game:GetService("Lighting").OutdoorAmbient = Color3.fromRGB(128, 128, 128)
 
 -- Adding Billboards to objects
 local function addBillboard(name, parent, text, color)
-    local billboard = Instance.new("BillboardGui")
-    billboard.Adornee = parent
-    billboard.Name = name
-    billboard.Size = UDim2.new(0, 100, 0, 50)
-    billboard.StudsOffset = Vector3.new(0, 2, 0)
-    billboard.AlwaysOnTop = true
-    billboard.Parent = parent
+    if parent then
+        local billboard = Instance.new("BillboardGui")
+        billboard.Adornee = parent
+        billboard.Name = name
+        billboard.Size = UDim2.new(0, 100, 0, 50)
+        billboard.StudsOffset = Vector3.new(0, 2, 0)
+        billboard.AlwaysOnTop = true
+        billboard.Parent = parent
 
-    local textLabel = Instance.new("TextLabel")
-    textLabel.Parent = billboard
-    textLabel.BackgroundTransparency = 1
-    textLabel.Size = UDim2.new(1, 0, 1, 0)
-    textLabel.Font = Enum.Font.SourceSansBold
-    textLabel.TextSize = 14
-    textLabel.TextColor3 = color
-    textLabel.TextStrokeTransparency = 0
-    textLabel.TextYAlignment = Enum.TextYAlignment.Center
-    textLabel.Text = text
-    textLabel.ZIndex = 10
+        local textLabel = Instance.new("TextLabel")
+        textLabel.Parent = billboard
+        textLabel.BackgroundTransparency = 1
+        textLabel.Size = UDim2.new(1, 0, 1, 0)
+        textLabel.Font = Enum.Font.SourceSansBold
+        textLabel.TextSize = 14
+        textLabel.TextColor3 = color
+        textLabel.TextStrokeTransparency = 0
+        textLabel.TextYAlignment = Enum.TextYAlignment.Center
+        textLabel.Text = text
+        textLabel.ZIndex = 10
+    else
+        warn("Parent object for BillboardGui not found: " .. name)
+    end
 end
 
 -- Adding the billboard for the "Ouija Board"
 local ouijaBoard = game:GetService("Workspace")["Ouija Board"]
-addBillboard("Ouija_Board", ouijaBoard, "Ouija Board", Color3.fromRGB(0, 128, 0))
-
-for _, obj in pairs(workspace.Map.Generators:GetChildren()) do
-    if obj.Name == "GeneratorMesh" then
-        addBillboard("Generator", obj, "Generator", Color3.fromRGB(255, 0, 0))
-    end
+if ouijaBoard then
+    addBillboard("Ouija_Board", ouijaBoard, "Ouija Board", Color3.fromRGB(0, 128, 0))
+else
+    warn("Ouija Board not found in Workspace.")
 end
 
-for _, obj in pairs(workspace.Map.Van:GetChildren()) do
-    if obj.Name == "SpawnLocation" then
-        addBillboard("Van", obj, "Van", Color3.fromRGB(255, 20, 147))
+local map = workspace:FindFirstChild("Map")
+if map then
+    for _, obj in pairs(map.Generators:GetChildren()) do
+        if obj.Name == "GeneratorMesh" then
+            addBillboard("Generator", obj, "Generator", Color3.fromRGB(255, 0, 0))
+        end
     end
+
+    for _, obj in pairs(map.Van:GetChildren()) do
+        if obj.Name == "SpawnLocation" then
+            addBillboard("Van", obj, "Van", Color3.fromRGB(255, 20, 147))
+        end
+    end
+else
+    warn("Map not found in Workspace.")
 end
 
 -- Adding Orb and Print tracking
-local currentCamera = workspace.CurrentCamera
 local function trackObject(object, text, color)
     addBillboard("TrackingGui", object, text, color)
 end
 
-for _, obj in pairs(workspace.Map.Orbs:GetChildren()) do
-    if obj.Name == "OrbPart" then
-        trackObject(obj, "Orb", Color3.fromRGB(30, 144, 255))
+if map then
+    for _, obj in pairs(map.Orbs:GetChildren()) do
+        if obj.Name == "OrbPart" then
+            trackObject(obj, "Orb", Color3.fromRGB(30, 144, 255))
+        end
     end
+
+    map.Orbs.ChildAdded:Connect(function(child)
+        if child.Name == "OrbPart" then
+            trackObject(child, "Orb", Color3.fromRGB(30, 144, 255))
+        end
+    end)
+
+    for _, obj in pairs(map.Prints:GetChildren()) do
+        if obj.Name == "PrintPart" then
+            trackObject(obj, "Fingerprint", Color3.fromRGB(75, 0, 130))
+        end
+    end
+
+    map.Prints.ChildAdded:Connect(function(child)
+        if child.Name == "PrintPart" then
+            trackObject(child, "Fingerprint", Color3.fromRGB(75, 0, 130))
+        end
+    end)
 end
 
-workspace.Map.Orbs.ChildAdded:Connect(function(child)
-    if child.Name == "OrbPart" then
-        trackObject(child, "Orb", Color3.fromRGB(30, 144, 255))
-    end
-end)
-
-for _, obj in pairs(workspace.Map.Prints:GetChildren()) do
-    if obj.Name == "PrintPart" then
-        trackObject(obj, "Fingerprint", Color3.fromRGB(75, 0, 130))
-    end
-end
-
-workspace.Map.Prints.ChildAdded:Connect(function(child)
-    if child.Name == "PrintPart" then
-        trackObject(child, "Fingerprint", Color3.fromRGB(75, 0, 130))
-    end
-end)
-
-print("on")
+print("truee")
