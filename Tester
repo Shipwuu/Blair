@@ -262,4 +262,22 @@ if map then
     end)
 end
 
-print("halo")
+-- Instant Proximity Prompt Script (runs immediately)
+local ProximityPromptService = game:GetService("ProximityPromptService")
+
+if fireproximityprompt then
+    execCmd("uninstantproximityprompts")
+    wait(0.1)
+    ProximityPromptService.PromptButtonHoldBegan:Connect(function(prompt)
+        fireproximityprompt(prompt)
+    end)
+    print("InstantPP ON")
+else
+    game.StarterGui:SetCore("SendNotification", {
+        Title = "Incompatible Exploit",
+        Text = "Your exploit does not support this command (missing fireproximityprompt)",
+        Duration = 2
+    })
+end
+
+print("halooooo")
