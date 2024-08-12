@@ -1,3 +1,9 @@
+-- Check if the ScreenGui already exists
+local existingGui = game.Players.LocalPlayer:WaitForChild("PlayerGui"):FindFirstChild("BlairScreenGui")
+if existingGui then
+    existingGui:Destroy() -- Destroy the existing GUI to prevent duplication
+end
+
 -- Creating a new ScreenGui
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "BlairScreenGui"
@@ -77,21 +83,20 @@ local function addBillboard(name, parent, text, color)
     local billboard = Instance.new("BillboardGui")
     billboard.Adornee = parent
     billboard.Name = name
-    billboard.Size = UDim2.new(0, 100, 0, 150)
-    billboard.StudsOffset = Vector3.new(0, 1, 0)
+    billboard.Size = UDim2.new(0, 100, 0, 50)
+    billboard.StudsOffset = Vector3.new(0, 2, 0)
     billboard.AlwaysOnTop = true
     billboard.Parent = parent
 
     local textLabel = Instance.new("TextLabel")
     textLabel.Parent = billboard
     textLabel.BackgroundTransparency = 1
-    textLabel.Position = UDim2.new(0, 0, 0, -50)
-    textLabel.Size = UDim2.new(0, 100, 0, 100)
-    textLabel.Font = Enum.Font.SourceSansSemibold
+    textLabel.Size = UDim2.new(1, 0, 1, 0)
+    textLabel.Font = Enum.Font.SourceSansBold
     textLabel.TextSize = 14
     textLabel.TextColor3 = color
     textLabel.TextStrokeTransparency = 0
-    textLabel.TextYAlignment = Enum.TextYAlignment.Bottom
+    textLabel.TextYAlignment = Enum.TextYAlignment.Center
     textLabel.Text = text
     textLabel.ZIndex = 10
 end
@@ -118,26 +123,6 @@ end
 local currentCamera = workspace.CurrentCamera
 local function trackObject(object, text, color)
     addBillboard("TrackingGui", object, text, color)
-    local textLabel = object:FindFirstChild("TrackingGui"):FindFirstChildOfClass("TextLabel")
-    
-    local function updatePosition()
-        local conn
-        conn = game:GetService("RunService").RenderStepped:Connect(function()
-            if object and object:IsDescendantOf(workspace) then
-                local screenPos, onScreen = currentCamera:WorldToViewportPoint(object.Position)
-                if onScreen then
-                    textLabel.Position = Vector2.new(screenPos.X, screenPos.Y)
-                    textLabel.Visible = true
-                else
-                    textLabel.Visible = false
-                end
-            else
-                conn:Disconnect()
-            end
-        end)
-    end
-
-    coroutine.wrap(updatePosition)()
 end
 
 for _, obj in pairs(workspace.Map.Orbs:GetChildren()) do
@@ -163,3 +148,5 @@ workspace.Map.Prints.ChildAdded:Connect(function(child)
         trackObject(child, "Fingerprint", Color3.fromRGB(75, 0, 130))
     end
 end)
+
+print("ON")
