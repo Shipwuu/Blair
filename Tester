@@ -9,17 +9,18 @@ local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "BlairScreenGui"
 screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
 
--- Creating the main frame
+-- Creating the main frame for Blair GUI
 local mainFrame = Instance.new("Frame")
 mainFrame.Name = "MainFrame"
 mainFrame.Parent = screenGui
-mainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
-mainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
-mainFrame.Size = UDim2.new(0, 400, 0, 300)
+mainFrame.AnchorPoint = Vector2.new(0, 0.5)
+mainFrame.Position = UDim2.new(0, 0, 0.5, 0)
+mainFrame.Size = UDim2.new(0.25, 0, 0.25, 0) -- 1/4 of the screen
 mainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 mainFrame.BorderSizePixel = 0
+mainFrame.Visible = false -- Start hidden until toggle is pressed
 
--- Adding a title
+-- Adding a title to Blair GUI
 local titleLabel = Instance.new("TextLabel")
 titleLabel.Parent = mainFrame
 titleLabel.Position = UDim2.new(0, 0, 0, 0)
@@ -30,7 +31,7 @@ titleLabel.Text = "Blair GUI"
 titleLabel.TextSize = 24
 titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 
--- Adding buttons for actions
+-- Adding buttons for actions in Blair GUI
 local function createButton(name, text, callback)
     local button = Instance.new("TextButton")
     button.Name = name
@@ -46,18 +47,6 @@ local function createButton(name, text, callback)
 
     button.MouseButton1Click:Connect(callback)
 end
-
-createButton("SanityCheckButton", "Sanity Check", function()
-    local player = game:GetService("Players").LocalPlayer
-    local sanity = player:FindFirstChild("Sanity")
-    if sanity then
-        game.StarterGui:SetCore("SendNotification", {
-            Title = "Info",
-            Text = "Sanity "..sanity.Value,
-            Duration = 1.5
-        })
-    end
-end)
 
 createButton("TpToOuijaButton", "TpToOuija", function()
     local ouijaBoard = game:GetService("Workspace")["Ouija Board"]
@@ -97,6 +86,54 @@ createButton("TpToVanButton", "TpToVan", function()
         })
     end
 end)
+
+-- Toggle button to show/hide Blair GUI
+local toggleButton = Instance.new("TextButton")
+toggleButton.Name = "ToggleBlairGUIButton"
+toggleButton.Parent = screenGui
+toggleButton.Size = UDim2.new(0, 100, 0, 50)
+toggleButton.Position = UDim2.new(0, 10, 0, 10)
+toggleButton.BackgroundColor3 = Color3.fromRGB(0, 128, 255)
+toggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+toggleButton.Font = Enum.Font.SourceSansBold
+toggleButton.TextSize = 18
+toggleButton.Text = "Toggle GUI"
+
+toggleButton.MouseButton1Click:Connect(function()
+    mainFrame.Visible = not mainFrame.Visible
+end)
+
+-- Creating the Sanity Check Frame
+local sanityFrame = Instance.new("Frame")
+sanityFrame.Name = "SanityFrame"
+sanityFrame.Parent = screenGui
+sanityFrame.AnchorPoint = Vector2.new(0.5, 0)
+sanityFrame.Position = UDim2.new(0.5, 0, 0, 10) -- Positioned at the middle top of the screen
+sanityFrame.Size = UDim2.new(0, 200, 0, 50)
+sanityFrame.BackgroundTransparency = 1 -- Transparent frame
+sanityFrame.BorderSizePixel = 0
+
+-- Adding Sanity Text
+local sanityLabel = Instance.new("TextLabel")
+sanityLabel.Parent = sanityFrame
+sanityLabel.Size = UDim2.new(1, 0, 1, 0)
+sanityLabel.BackgroundTransparency = 1
+sanityLabel.Font = Enum.Font.SourceSansBold
+sanityLabel.TextSize = 20
+sanityLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
+sanityLabel.Text = "Sanity: Loading..."
+sanityLabel.TextStrokeTransparency = 0.5
+
+-- Function to update Sanity Text continuously
+local player = game:GetService("Players").LocalPlayer
+local sanity = player:WaitForChild("Sanity", 5)
+if sanity then
+    sanity:GetPropertyChangedSignal("Value"):Connect(function()
+        sanityLabel.Text = "Sanity: " .. sanity.Value
+    end)
+else
+    sanityLabel.Text = "Sanity: N/A"
+end
 
 -- Set up lighting and other environmental effects
 game:GetService("Lighting").Brightness = 2
@@ -188,4 +225,4 @@ if map then
     end)
 end
 
-print("truee")
+print("on")
