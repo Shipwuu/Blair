@@ -137,6 +137,40 @@ else
     sanityLabel.Text = "Sanity: N/A"
 end
 
+-- Check for Crused Items before proceeding
+local function checkCrusedItems()
+    local crusedItems = {}
+    
+    local ouijaBoard = game:GetService("Workspace"):FindFirstChild("Ouija Board")
+    if ouijaBoard then
+        table.insert(crusedItems, "Ouija Board")
+    end
+
+    local summoningCircle = game:GetService("Workspace"):FindFirstChild("SummoningCircle")
+    if summoningCircle then
+        table.insert(crusedItems, "Summoning Circle")
+    end
+
+    return crusedItems
+end
+
+local crusedItems = checkCrusedItems()
+
+if #crusedItems == 0 then
+    game.StarterGui:SetCore("SendNotification", {
+        Title = "No Crused Items",
+        Text = "No Crused Items found in the game.",
+        Duration = 3
+    })
+else
+    game.StarterGui:SetCore("SendNotification", {
+        Title = "Crused Items Found",
+        Text = "Found: " .. table.concat(crusedItems, ", "),
+        Duration = 3
+    })
+end
+
+-- Continue with the rest of the script even if no Crused Items are found
 -- Set up lighting and other environmental effects
 game:GetService("Lighting").Brightness = 2
 game:GetService("Lighting").ClockTime = 0
@@ -171,12 +205,13 @@ local function addBillboard(name, parent, text, color)
     end
 end
 
--- Adding the billboard for the "Ouija Board"
-local ouijaBoard = game:GetService("Workspace")["Ouija Board"]
+-- Adding the billboard for Crused Items if found
 if ouijaBoard then
     addBillboard("Ouija_Board", ouijaBoard, "Ouija Board", Color3.fromRGB(0, 128, 0))
-else
-    warn("Ouija Board not found in Workspace.")
+end
+
+if summoningCircle then
+    addBillboard("Summoning_Circle", summoningCircle, "Summoning Circle", Color3.fromRGB(255, 140, 0))
 end
 
 local map = workspace:FindFirstChild("Map")
