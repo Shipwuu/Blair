@@ -108,6 +108,15 @@ local function checkCrusedItems()
         crusedItemObjects["Summoning Circle"] = summoningCircle
     end
 
+    local tarotCards = game:GetService("Workspace").Map.Items:FindFirstChild("Tarot Cards")
+    if tarotCards then
+        local tarotCardHandle = tarotCards:FindFirstChild("Handle")
+        if tarotCardHandle then
+            table.insert(crusedItems, "Tarot Cards")
+            crusedItemObjects["Tarot Cards"] = tarotCardHandle
+        end
+    end
+
     return crusedItems, crusedItemObjects
 end
 
@@ -128,7 +137,7 @@ else
 
     -- Add billboards and teleport buttons for each found Crused Item
     for itemName, itemObject in pairs(crusedItemObjects) do
-        local color = Color3.fromRGB(255, 140, 0)
+        local color = itemName == "Summoning Circle" and Color3.fromRGB(255, 140, 0) or Color3.fromRGB(128, 0, 128)
         addBillboard(itemName, itemObject, itemName, color)
         
         createButton("TpTo" .. itemName, "Teleport to " .. itemName, function()
@@ -237,5 +246,4 @@ else
         Duration = 2
     })
 end
-
 print("halo")
