@@ -60,7 +60,7 @@ createButton("SanityCheckButton", "Sanity Check", function()
 end)
 
 createButton("TpToOuijaButton", "TpToOuija", function()
-    game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame = game:GetService("Workspace")["Ouija Board"].Board.CFrame
+    game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame = game:GetService("Workspace")["Ouija Board"].CFrame
 end)
 
 createButton("TpToGeneratorButton", "TpToGenerator", function()
@@ -101,11 +101,9 @@ local function addBillboard(name, parent, text, color)
     textLabel.ZIndex = 10
 end
 
-for _, obj in pairs(workspace.Map.OuijaSpawn:GetChildren()) do
-    if obj.Name == "Ouija" then
-        addBillboard("Ouija_Board", obj, "Ouija Board", Color3.fromRGB(0, 128, 0))
-    end
-end
+-- Adding the billboard for the "Ouija Board"
+local ouijaBoard = game:GetService("Workspace")["Ouija Board"]
+addBillboard("Ouija_Board", ouijaBoard, "Ouija Board", Color3.fromRGB(0, 128, 0))
 
 for _, obj in pairs(workspace.Map.Generators:GetChildren()) do
     if obj.Name == "GeneratorMesh" then
@@ -149,4 +147,4 @@ workspace.Map.Prints.ChildAdded:Connect(function(child)
     end
 end)
 
-print("ON")
+print("on")
