@@ -33,7 +33,7 @@ titleLabel.Text = "Blair GUI"
 titleLabel.TextSize = 24
 titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 
--- Adding buttons for actions in Blair GUI
+-- Function to create buttons
 local function createButton(name, text, callback)
     local button = Instance.new("TextButton")
     button.Name = name
@@ -46,48 +46,8 @@ local function createButton(name, text, callback)
     button.Font = Enum.Font.SourceSans
     button.TextSize = 16 -- Reduced text size
     button.Text = text
-
     button.MouseButton1Click:Connect(callback)
 end
-
-createButton("TpToOuijaButton", "TpToOuija", function()
-    local ouijaBoard = game:GetService("Workspace")["Ouija Board"]
-    if ouijaBoard then
-        game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame = ouijaBoard.CFrame
-    else
-        game.StarterGui:SetCore("SendNotification", {
-            Title = "Error",
-            Text = "Ouija Board not found",
-            Duration = 2
-        })
-    end
-end)
-
-createButton("TpToGeneratorButton", "TpToGenerator", function()
-    local generator = workspace:FindFirstChild("Map") and workspace.Map.Generators:FindFirstChild("GeneratorMesh")
-    if generator then
-        game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame = generator.CFrame
-    else
-        game.StarterGui:SetCore("SendNotification", {
-            Title = "Error",
-            Text = "Generator not found",
-            Duration = 2
-        })
-    end
-end)
-
-createButton("TpToVanButton", "TpToVan", function()
-    local van = workspace:FindFirstChild("Map") and workspace.Map.Van:FindFirstChild("SpawnLocation")
-    if van then
-        game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame = van.CFrame
-    else
-        game.StarterGui:SetCore("SendNotification", {
-            Title = "Error",
-            Text = "Van not found",
-            Duration = 2
-        })
-    end
-end)
 
 -- Toggle button to show/hide Blair GUI
 local toggleButton = Instance.new("TextButton")
@@ -140,21 +100,24 @@ end
 -- Check for Crused Items before proceeding
 local function checkCrusedItems()
     local crusedItems = {}
+    local crusedItemObjects = {}
     
     local ouijaBoard = game:GetService("Workspace"):FindFirstChild("Ouija Board")
     if ouijaBoard then
         table.insert(crusedItems, "Ouija Board")
+        crusedItemObjects["Ouija Board"] = ouijaBoard
     end
 
     local summoningCircle = game:GetService("Workspace"):FindFirstChild("SummoningCircle")
     if summoningCircle then
         table.insert(crusedItems, "Summoning Circle")
+        crusedItemObjects["Summoning Circle"] = summoningCircle
     end
 
-    return crusedItems
+    return crusedItems, crusedItemObjects
 end
 
-local crusedItems = checkCrusedItems()
+local crusedItems, crusedItemObjects = checkCrusedItems()
 
 if #crusedItems == 0 then
     game.StarterGui:SetCore("SendNotification", {
@@ -168,6 +131,16 @@ else
         Text = "Found: " .. table.concat(crusedItems, ", "),
         Duration = 3
     })
+
+    -- Add billboards and teleport buttons for each found Crused Item
+    for itemName, itemObject in pairs(crusedItemObjects) do
+        local color = itemName == "Ouija Board" and Color3.fromRGB(0, 128, 0) or Color3.fromRGB(255, 140, 0)
+        addBillboard(itemName, itemObject, itemName, color)
+        
+        createButton("TpTo" .. itemName, "Teleport to " .. itemName, function()
+            game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame = itemObject.CFrame
+        end)
+    end
 end
 
 -- Continue with the rest of the script even if no Crused Items are found
@@ -178,8 +151,8 @@ game:GetService("Lighting").FogEnd = 100000
 game:GetService("Lighting").GlobalShadows = false
 game:GetService("Lighting").OutdoorAmbient = Color3.fromRGB(128, 128, 128)
 
--- Adding Billboards to objects
-local function addBillboard(name, parent, text, color)
+-- Function to add billboards to objects
+function addBillboard(name, parent, text, color)
     if parent then
         local billboard = Instance.new("BillboardGui")
         billboard.Adornee = parent
@@ -203,15 +176,6 @@ local function addBillboard(name, parent, text, color)
     else
         warn("Parent object for BillboardGui not found: " .. name)
     end
-end
-
--- Adding the billboard for Crused Items if found
-if ouijaBoard then
-    addBillboard("Ouija_Board", ouijaBoard, "Ouija Board", Color3.fromRGB(0, 128, 0))
-end
-
-if summoningCircle then
-    addBillboard("Summoning_Circle", summoningCircle, "Summoning Circle", Color3.fromRGB(255, 140, 0))
 end
 
 local map = workspace:FindFirstChild("Map")
