@@ -34,15 +34,17 @@ mainFrame.Visible = false -- Start hidden until toggle is pressed
 mainFrame.ScrollBarThickness = 8
 
 -- Adding a title to Blair GUI
-local titleLabel = Instance.new("TextLabel")
-titleLabel.Parent = mainFrame
-titleLabel.Position = UDim2.new(0, 0, 0, 0)
-titleLabel.Size = UDim2.new(1, 0, 0, 50)
-titleLabel.BackgroundTransparency = 1
-titleLabel.Font = Enum.Font.SourceSansBold
-titleLabel.Text = "Blair GUI"
-titleLabel.TextSize = 24
-titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+safeCall(function()
+    local titleLabel = Instance.new("TextLabel")
+    titleLabel.Parent = mainFrame
+    titleLabel.Position = UDim2.new(0, 0, 0, 0)
+    titleLabel.Size = UDim2.new(1, 0, 0, 50)
+    titleLabel.BackgroundTransparency = 1
+    titleLabel.Font = Enum.Font.SourceSansBold
+    titleLabel.Text = "Blair GUI"
+    titleLabel.TextSize = 24
+    titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+end)
 
 -- Function to create buttons
 local function createButton(name, text, callback)
@@ -282,4 +284,4 @@ safeCall(function()
     end)
 end)
 
-print("ooooooo")
+print("ooooo")
