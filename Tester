@@ -101,7 +101,7 @@ end)
 -- Function to add billboards to objects
 local function trackObject(object, text, color)
     safeCall(function()
-        if not object:FindFirstChild(text) then
+        if object and not object:FindFirstChild(text) then
             local billboard = Instance.new("BillboardGui")
             billboard.Adornee = object
             billboard.Name = text
@@ -129,11 +129,10 @@ end
 local function continuousTrack(objectContainer, objectName, displayName, color)
     safeCall(function()
         while true do
-            if objectContainer and objectContainer:FindFirstChild(objectName) then
-                for _, obj in pairs(objectContainer:GetChildren()) do
-                    if obj.Name == objectName then
-                        trackObject(obj, displayName, color)
-                    end
+            if objectContainer then
+                local obj = objectContainer:FindFirstChild(objectName)
+                if obj then
+                    trackObject(obj, displayName, color)
                 end
             end
             wait(1) -- Check every 1 second to ensure billboards stay intact
@@ -159,12 +158,15 @@ local function checkCrusedItems()
             crusedItemObjects["Summoning Circle"] = summoningCircle
         end
 
-        local tarotCards = game:GetService("Workspace").Map.Items:FindFirstChild("Tarot Cards")
+        local tarotCards = game:GetService("Workspace"):FindFirstChild("Map")
         if tarotCards then
-            local tarotCardHandle = tarotCards:FindFirstChild("Handle")
-            if tarotCardHandle then
-                table.insert(crusedItems, "Tarot Cards")
-                crusedItemObjects["Tarot Cards"] = tarotCardHandle
+            local items = tarotCards:FindFirstChild("Items")
+            if items then
+                local tarotCardHandle = items:FindFirstChild("Tarot Cards")
+                if tarotCardHandle and tarotCardHandle:FindFirstChild("Handle") then
+                    table.insert(crusedItems, "Tarot Cards")
+                    crusedItemObjects["Tarot Cards"] = tarotCardHandle.Handle
+                end
             end
         end
     end)
@@ -206,25 +208,45 @@ safeCall(function()
     game:GetService("Lighting").OutdoorAmbient = Color3.fromRGB(128, 128, 128)
 end)
 
-local map = safeCall(function() return workspace:FindFirstChild("Map") end)
+local map = workspace:FindFirstChild("Map")
 
 if map then
     -- Track Generators
-    local generatorMesh = map:FindFirstChild("Generators"):FindFirstChild("GeneratorMesh")
-    if generatorMesh then
-        trackObject(generatorMesh, "Generator", Color3.fromRGB(255, 0, 0))
+    local generators = map:FindFirstChild("Generators")
+    if generators then
+        local generatorMesh = generators:FindFirstChild("GeneratorMesh")
+        if generatorMesh then
+            trackObject(generatorMesh, "Generator", Color3.fromRGB(255, 0, 0))
+        else
+            warn("GeneratorMesh not found in workspace.Map.Generators.")
+        end
     else
-        warn("GeneratorMesh not found in workspace.Map.Generators.")
+        warn("Generators not found in workspace.Map.")
     end
 
     -- Track Van
-    continuousTrack(map.Van, "SpawnLocation", "Van", Color3.fromRGB(255, 20, 147))
+    local van = map:FindFirstChild("Van")
+    if van then
+        continuousTrack(van, "SpawnLocation", "Van", Color3.fromRGB(255, 20, 147))
+    else
+        warn("Van not found in workspace.Map.")
+    end
 
     -- Track Orbs
-    continuousTrack(map.Orbs, "OrbPart", "Orb", Color3.fromRGB(30, 144, 255))
+    local orbs = map:FindFirstChild("Orbs")
+    if orbs then
+        continuousTrack(orbs, "OrbPart", "Orb", Color3.fromRGB(30, 144, 255))
+    else
+        warn("Orbs not found in workspace.Map.")
+    end
 
     -- Track Prints
-    continuousTrack(map.Prints, "UV_Hand", "Fingerprint", Color3.fromRGB(75, 0, 130))
+    local prints = map:FindFirstChild("Prints")
+    if prints then
+        continuousTrack(prints, "UV_Hand", "Fingerprint", Color3.fromRGB(75, 0, 130))
+    else
+        warn("Prints not found in workspace.Map.")
+    end
 else
     warn("Map not found in Workspace.")
 end
