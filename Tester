@@ -9,7 +9,7 @@ local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "BlairScreenGui"
 screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
 
--- Creating the scrolling frame for Blair GUI
+-- Creating the scrolling frame
 local mainFrame = Instance.new("ScrollingFrame")
 mainFrame.Name = "MainFrame"
 mainFrame.Parent = screenGui
@@ -22,7 +22,7 @@ mainFrame.BorderSizePixel = 0
 mainFrame.Visible = false -- Start hidden until toggle is pressed
 mainFrame.ScrollBarThickness = 8
 
--- Adding a title to Blair GUI
+-- Adding a title
 local titleLabel = Instance.new("TextLabel")
 titleLabel.Parent = mainFrame
 titleLabel.Position = UDim2.new(0, 0, 0, 0)
@@ -33,25 +33,9 @@ titleLabel.Text = "Blair GUI"
 titleLabel.TextSize = 24
 titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 
--- Function to create buttons
-local function createButton(name, text, callback)
-    local button = Instance.new("TextButton")
-    button.Name = name
-    button.Parent = mainFrame
-    button.Size = UDim2.new(0.8, 0, 0, 40) -- Reduced button size
-    button.Position = UDim2.new(0.1, 0, 0, 60 + (#mainFrame:GetChildren() - 2) * 50)
-    button.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-    button.BorderSizePixel = 0
-    button.TextColor3 = Color3.fromRGB(255, 255, 255)
-    button.Font = Enum.Font.SourceSans
-    button.TextSize = 16 -- Reduced text size
-    button.Text = text
-    button.MouseButton1Click:Connect(callback)
-end
-
--- Toggle button to show/hide Blair GUI
+-- Toggle button to show/hide GUI
 local toggleButton = Instance.new("TextButton")
-toggleButton.Name = "ToggleBlairGUIButton"
+toggleButton.Name = "ToggleGUIButton"
 toggleButton.Parent = screenGui
 toggleButton.Size = UDim2.new(0, 100, 0, 50)
 toggleButton.Position = UDim2.new(0, 10, 0, 10)
@@ -180,14 +164,10 @@ else
         Duration = 3
     })
 
-    -- Add billboards and teleport buttons for each found Crused Item
+    -- Add billboards for each found Crused Item
     for itemName, itemObject in pairs(crusedItemObjects) do
         local color = itemName == "Ouija Board" and Color3.fromRGB(0, 128, 0) or (itemName == "Summoning Circle" and Color3.fromRGB(255, 140, 0) or Color3.fromRGB(128, 0, 128))
         trackObject(itemObject, itemName, color)
-        
-        createButton("TpTo" .. itemName, "Teleport to " .. itemName, function()
-            game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame = itemObject.CFrame
-        end)
     end
 end
 
@@ -212,33 +192,6 @@ if map then
 
     -- Track Prints
     continuousTrack(map.Prints, "UV_Hand", "Fingerprint", Color3.fromRGB(75, 0, 130))
-
-    -- Adding teleport buttons for Generator and Van
-    createButton("TpToGenerator", "Teleport to Generator", function()
-        local generator = map.Generators:FindFirstChild("GeneratorMesh")
-        if generator then
-            game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame = generator.CFrame
-        else
-            game.StarterGui:SetCore("SendNotification", {
-                Title = "Error",
-                Text = "Generator not found",
-                Duration = 2
-            })
-        end
-    end)
-
-    createButton("TpToVan", "Teleport to Van", function()
-        local van = map.Van:FindFirstChild("SpawnLocation")
-        if van then
-            game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame = van.CFrame
-        else
-            game.StarterGui:SetCore("SendNotification", {
-                Title = "Error",
-                Text = "Van not found",
-                Duration = 2
-            })
-        end
-    end)
 else
     warn("Map not found in Workspace.")
 end
@@ -260,3 +213,5 @@ else
         Duration = 2
     })
 end
+
+print("Gui 1 🔵")
