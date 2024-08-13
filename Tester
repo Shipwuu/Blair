@@ -1,19 +1,8 @@
--- Utility function to handle errors and continue execution
-local function safeCall(func, ...)
-    local success, result = pcall(func, ...)
-    if not success then
-        warn("Error occurred: " .. result)
-    end
-    return success, result
-end
-
 -- Check if the ScreenGui already exists
-safeCall(function()
-    local existingGui = game.Players.LocalPlayer:WaitForChild("PlayerGui"):FindFirstChild("BlairScreenGui")
-    if existingGui then
-        existingGui:Destroy() -- Destroy the existing GUI to prevent duplication
-    end
-end)
+local existingGui = game.Players.LocalPlayer:WaitForChild("PlayerGui"):FindFirstChild("BlairScreenGui")
+if existingGui then
+    existingGui:Destroy() -- Destroy the existing GUI to prevent duplication
+end
 
 -- Creating a new ScreenGui
 local screenGui = Instance.new("ScreenGui")
@@ -46,115 +35,105 @@ titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 
 -- Function to create buttons
 local function createButton(name, text, callback)
-    safeCall(function()
-        local button = Instance.new("TextButton")
-        button.Name = name
-        button.Parent = mainFrame
-        button.Size = UDim2.new(0.8, 0, 0, 40) -- Reduced button size
-        button.Position = UDim2.new(0.1, 0, 0, 60 + (#mainFrame:GetChildren() - 2) * 50)
-        button.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-        button.BorderSizePixel = 0
-        button.TextColor3 = Color3.fromRGB(255, 255, 255)
-        button.Font = Enum.Font.SourceSans
-        button.TextSize = 16 -- Reduced text size
-        button.Text = text
-        button.MouseButton1Click:Connect(callback)
-    end)
+    local button = Instance.new("TextButton")
+    button.Name = name
+    button.Parent = mainFrame
+    button.Size = UDim2.new(0.8, 0, 0, 40) -- Reduced button size
+    button.Position = UDim2.new(0.1, 0, 0, 60 + (#mainFrame:GetChildren() - 2) * 50)
+    button.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    button.BorderSizePixel = 0
+    button.TextColor3 = Color3.fromRGB(255, 255, 255)
+    button.Font = Enum.Font.SourceSans
+    button.TextSize = 16 -- Reduced text size
+    button.Text = text
+    button.MouseButton1Click:Connect(callback)
 end
 
 -- Toggle button to show/hide Blair GUI
-safeCall(function()
-    local toggleButton = Instance.new("TextButton")
-    toggleButton.Name = "ToggleBlairGUIButton"
-    toggleButton.Parent = screenGui
-    toggleButton.Size = UDim2.new(0, 100, 0, 50)
-    toggleButton.Position = UDim2.new(0, 10, 0, 10)
-    toggleButton.BackgroundColor3 = Color3.fromRGB(0, 128, 255)
-    toggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    toggleButton.Font = Enum.Font.SourceSansBold
-    toggleButton.TextSize = 18
-    toggleButton.Text = "Toggle GUI"
+local toggleButton = Instance.new("TextButton")
+toggleButton.Name = "ToggleBlairGUIButton"
+toggleButton.Parent = screenGui
+toggleButton.Size = UDim2.new(0, 100, 0, 50)
+toggleButton.Position = UDim2.new(0, 10, 0, 10)
+toggleButton.BackgroundColor3 = Color3.fromRGB(0, 128, 255)
+toggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+toggleButton.Font = Enum.Font.SourceSansBold
+toggleButton.TextSize = 18
+toggleButton.Text = "Toggle GUI"
 
-    toggleButton.MouseButton1Click:Connect(function()
-        mainFrame.Visible = not mainFrame.Visible
-    end)
+toggleButton.MouseButton1Click:Connect(function()
+    mainFrame.Visible = not mainFrame.Visible
 end)
 
 -- Creating the Sanity Check Frame
-safeCall(function()
-    local sanityFrame = Instance.new("Frame")
-    sanityFrame.Name = "SanityFrame"
-    sanityFrame.Parent = screenGui
-    sanityFrame.AnchorPoint = Vector2.new(0.5, 0)
-    sanityFrame.Position = UDim2.new(0.5, 0, 0, 10) -- Positioned at the middle top of the screen
-    sanityFrame.Size = UDim2.new(0, 200, 0, 50)
-    sanityFrame.BackgroundTransparency = 1 -- Transparent frame
-    sanityFrame.BorderSizePixel = 0
+local sanityFrame = Instance.new("Frame")
+sanityFrame.Name = "SanityFrame"
+sanityFrame.Parent = screenGui
+sanityFrame.AnchorPoint = Vector2.new(0.5, 0)
+sanityFrame.Position = UDim2.new(0.5, 0, 0, 10) -- Positioned at the middle top of the screen
+sanityFrame.Size = UDim2.new(0, 200, 0, 50)
+sanityFrame.BackgroundTransparency = 1 -- Transparent frame
+sanityFrame.BorderSizePixel = 0
 
-    -- Adding Sanity Text
-    local sanityLabel = Instance.new("TextLabel")
-    sanityLabel.Parent = sanityFrame
-    sanityLabel.Size = UDim2.new(1, 0, 1, 0)
-    sanityLabel.BackgroundTransparency = 1
-    sanityLabel.Font = Enum.Font.SourceSansBold
-    sanityLabel.TextSize = 20
-    sanityLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
-    sanityLabel.Text = "Sanity: Loading..."
-    sanityLabel.TextStrokeTransparency = 0.5
+-- Adding Sanity Text
+local sanityLabel = Instance.new("TextLabel")
+sanityLabel.Parent = sanityFrame
+sanityLabel.Size = UDim2.new(1, 0, 1, 0)
+sanityLabel.BackgroundTransparency = 1
+sanityLabel.Font = Enum.Font.SourceSansBold
+sanityLabel.TextSize = 20
+sanityLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
+sanityLabel.Text = "Sanity: Loading..."
+sanityLabel.TextStrokeTransparency = 0.5
 
-    -- Function to update Sanity Text continuously
-    local player = game:GetService("Players").LocalPlayer
-    local sanity = player:WaitForChild("Sanity", 5)
-    if sanity then
-        sanity:GetPropertyChangedSignal("Value"):Connect(function()
-            sanityLabel.Text = "Sanity: " .. sanity.Value
-        end)
-    else
-        sanityLabel.Text = "Sanity: N/A"
-    end
-end)
+-- Function to update Sanity Text continuously
+local player = game:GetService("Players").LocalPlayer
+local sanity = player:WaitForChild("Sanity", 5)
+if sanity then
+    sanity:GetPropertyChangedSignal("Value"):Connect(function()
+        sanityLabel.Text = "Sanity: " .. sanity.Value
+    end)
+else
+    sanityLabel.Text = "Sanity: N/A"
+end
 
 -- Function to add billboards to objects
 local function trackObject(object, text, color)
-    safeCall(function()
-        if not object:FindFirstChild(text) then
-            local billboard = Instance.new("BillboardGui")
-            billboard.Adornee = object
-            billboard.Name = text
-            billboard.Size = UDim2.new(0, 100, 0, 50)
-            billboard.StudsOffset = Vector3.new(0, 2, 0)
-            billboard.AlwaysOnTop = true
-            billboard.Parent = object
+    if not object:FindFirstChild(text) then
+        local billboard = Instance.new("BillboardGui")
+        billboard.Adornee = object
+        billboard.Name = text
+        billboard.Size = UDim2.new(0, 100, 0, 50)
+        billboard.StudsOffset = Vector3.new(0, 2, 0)
+        billboard.AlwaysOnTop = true
+        billboard.Parent = object
 
-            local textLabel = Instance.new("TextLabel")
-            textLabel.Parent = billboard
-            textLabel.BackgroundTransparency = 1
-            textLabel.Size = UDim2.new(1, 0, 1, 0)
-            textLabel.Font = Enum.Font.SourceSansBold
-            textLabel.TextSize = 14
-            textLabel.TextColor3 = color
-            textLabel.TextStrokeTransparency = 0
-            textLabel.TextYAlignment = Enum.TextYAlignment.Center
-            textLabel.Text = text
-            textLabel.ZIndex = 10
-        end
-    end)
+        local textLabel = Instance.new("TextLabel")
+        textLabel.Parent = billboard
+        textLabel.BackgroundTransparency = 1
+        textLabel.Size = UDim2.new(1, 0, 1, 0)
+        textLabel.Font = Enum.Font.SourceSansBold
+        textLabel.TextSize = 14
+        textLabel.TextColor3 = color
+        textLabel.TextStrokeTransparency = 0
+        textLabel.TextYAlignment = Enum.TextYAlignment.Center
+        textLabel.Text = text
+        textLabel.ZIndex = 10
+    end
 end
 
 -- Function to continuously track objects and ensure billboards remain intact
 local function continuousTrack(objectContainer, objectName, displayName, color)
-    safeCall(function()
-        while true do
-            if objectContainer and objectContainer:FindFirstChild(objectName) then
-                for _, obj in pairs(objectContainer:GetChildren()) do
-                    if obj.Name == objectName then
-                        trackObject(obj, displayName, color)
-                    end
+    while true do
+        if objectContainer and objectContainer:FindFirstChild(objectName) then
+            for _, obj in pairs(objectContainer:GetChildren()) do
+                if obj.Name == objectName then
+                    trackObject(obj, displayName, color)
                 end
             end
-            wait(1) -- Check every 1 second to ensure billboards stay intact
         end
-    end)
+        wait(1) -- Check every 1 second to ensure billboards stay intact
+    end
 end
 
 -- Check for Crused Items before proceeding
@@ -162,72 +141,65 @@ local function checkCrusedItems()
     local crusedItems = {}
     local crusedItemObjects = {}
 
-    safeCall(function()
-        local ouijaBoard = game:GetService("Workspace"):FindFirstChild("Ouija Board")
-        if ouijaBoard then
-            table.insert(crusedItems, "Ouija Board")
-            crusedItemObjects["Ouija Board"] = ouijaBoard
-        end
+    local ouijaBoard = game:GetService("Workspace"):FindFirstChild("Ouija Board")
+    if ouijaBoard then
+        table.insert(crusedItems, "Ouija Board")
+        crusedItemObjects["Ouija Board"] = ouijaBoard
+    end
 
-        local summoningCircle = game:GetService("Workspace"):FindFirstChild("SummoningCircle")
-        if summoningCircle then
-            table.insert(crusedItems, "Summoning Circle")
-            crusedItemObjects["Summoning Circle"] = summoningCircle
-        end
+    local summoningCircle = game:GetService("Workspace"):FindFirstChild("SummoningCircle")
+    if summoningCircle then
+        table.insert(crusedItems, "Summoning Circle")
+        crusedItemObjects["Summoning Circle"] = summoningCircle
+    end
 
-        local tarotCards = game:GetService("Workspace").Map.Items:FindFirstChild("Tarot Cards")
-        if tarotCards then
-            local tarotCardHandle = tarotCards:FindFirstChild("Handle")
-            if tarotCardHandle then
-                table.insert(crusedItems, "Tarot Cards")
-                crusedItemObjects["Tarot Cards"] = tarotCardHandle
-            end
+    local tarotCards = game:GetService("Workspace").Map.Items:FindFirstChild("Tarot Cards")
+    if tarotCards then
+        local tarotCardHandle = tarotCards:FindFirstChild("Handle")
+        if tarotCardHandle then
+            table.insert(crusedItems, "Tarot Cards")
+            crusedItemObjects["Tarot Cards"] = tarotCardHandle
         end
-    end)
+    end
 
     return crusedItems, crusedItemObjects
 end
 
 local crusedItems, crusedItemObjects = checkCrusedItems()
 
-safeCall(function()
-    if #crusedItems == 0 then
-        game.StarterGui:SetCore("SendNotification", {
-            Title = "No Crused Items",
-            Text = "No Crused Items found in the game.",
-            Duration = 3
-        })
-    else
-        game.StarterGui:SetCore("SendNotification", {
-            Title = "Crused Items Found",
-            Text = "Found: " .. table.concat(crusedItems, ", "),
-            Duration = 3
-        })
+if #crusedItems == 0 then
+    game.StarterGui:SetCore("SendNotification", {
+        Title = "No Crused Items",
+        Text = "No Crused Items found in the game.",
+        Duration = 3
+    })
+else
+    game.StarterGui:SetCore("SendNotification", {
+        Title = "Crused Items Found",
+        Text = "Found: " .. table.concat(crusedItems, ", "),
+        Duration = 3
+    })
 
-        -- Add billboards and teleport buttons for each found Crused Item
-        for itemName, itemObject in pairs(crusedItemObjects) do
-            local color = itemName == "Ouija Board" and Color3.fromRGB(0, 128, 0) or (itemName == "Summoning Circle" and Color3.fromRGB(255, 140, 0) or Color3.fromRGB(128, 0, 128))
-            trackObject(itemObject, itemName, color)
-            
-            createButton("TpTo" .. itemName, "Teleport to " .. itemName, function()
-                game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame = itemObject.CFrame
-            end)
-        end
+    -- Add billboards and teleport buttons for each found Crused Item
+    for itemName, itemObject in pairs(crusedItemObjects) do
+        local color = itemName == "Ouija Board" and Color3.fromRGB(0, 128, 0) or (itemName == "Summoning Circle" and Color3.fromRGB(255, 140, 0) or Color3.fromRGB(128, 0, 128))
+        trackObject(itemObject, itemName, color)
+        
+        createButton("TpTo" .. itemName, "Teleport to " .. itemName, function()
+            game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame = itemObject.CFrame
+        end)
     end
-end)
+end
 
 -- Continue with the rest of the script even if no Crused Items are found
 -- Set up lighting and other environmental effects
-safeCall(function()
-    game:GetService("Lighting").Brightness = 2
-    game:GetService("Lighting").ClockTime = 0
-    game:GetService("Lighting").FogEnd = 100000
-    game:GetService("Lighting").GlobalShadows = false
-    game:GetService("Lighting").OutdoorAmbient = Color3.fromRGB(128, 128, 128)
-end)
+game:GetService("Lighting").Brightness = 2
+game:GetService("Lighting").ClockTime = 0
+game:GetService("Lighting").FogEnd = 100000
+game:GetService("Lighting").GlobalShadows = false
+game:GetService("Lighting").OutdoorAmbient = Color3.fromRGB(128, 128, 128)
 
-local map = safeCall(function() return workspace:FindFirstChild("Map") end)
-
+local map = workspace:FindFirstChild("Map")
 if map then
     -- Track Generators
     continuousTrack(map.Generators, "GeneratorMesh", "Generator", Color3.fromRGB(255, 0, 0))
@@ -243,43 +215,37 @@ if map then
 
     -- Adding teleport buttons for Generator and Van
     createButton("TpToGenerator", "Teleport to Generator", function()
-        safeCall(function()
-            local generator = map.Generators:FindFirstChild("GeneratorMesh")
-            if generator then
-                game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame = generator.CFrame
-            else
-                game.StarterGui:SetCore("SendNotification", {
-                    Title = "Error",
-                    Text = "Generator not found",
-                    Duration = 2
-                })
-            end
-        end)
+        local generator = map.Generators:FindFirstChild("GeneratorMesh")
+        if generator then
+            game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame = generator.CFrame
+        else
+            game.StarterGui:SetCore("SendNotification", {
+                Title = "Error",
+                Text = "Generator not found",
+                Duration = 2
+            })
+        end
     end)
 
     createButton("TpToVan", "Teleport to Van", function()
-        safeCall(function()
-            local van = map.Van:FindFirstChild("SpawnLocation")
-            if van then
-                game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame = van.CFrame
-            else
-                game.StarterGui:SetCore("SendNotification", {
-                    Title = "Error",
-                    Text = "Van not found",
-                    Duration = 2
-                })
-            end
-        end)
+        local van = map.Van:FindFirstChild("SpawnLocation")
+        if van then
+            game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame = van.CFrame
+        else
+            game.StarterGui:SetCore("SendNotification", {
+                Title = "Error",
+                Text = "Van not found",
+                Duration = 2
+            })
+        end
     end)
 else
     warn("Map not found in Workspace.")
 end
 
 -- Instant Proximity Prompt Script (runs immediately)
-safeCall(function()
-    game:GetService("ProximityPromptService").PromptButtonHoldBegan:Connect(function(prompt)
-        fireproximityprompt(prompt)
-    end)
+game:GetService("ProximityPromptService").PromptButtonHoldBegan:Connect(function(prompt)
+    fireproximityprompt(prompt)
 end)
 
-print("hellow")
+print("hellnah")
