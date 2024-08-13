@@ -1,89 +1,6 @@
--- Check if the ScreenGui already exists
-local existingGui = game.Players.LocalPlayer:WaitForChild("PlayerGui"):FindFirstChild("BlairScreenGui")
-if existingGui then
-    existingGui:Destroy() -- Destroy the existing GUI to prevent duplication
-end
-
--- Creating a new ScreenGui
-local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "BlairScreenGui"
-screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
-
--- Creating the scrolling frame
-local mainFrame = Instance.new("ScrollingFrame")
-mainFrame.Name = "MainFrame"
-mainFrame.Parent = screenGui
-mainFrame.AnchorPoint = Vector2.new(0, 0.5)
-mainFrame.Position = UDim2.new(0, 0, 0.5, 0)
-mainFrame.Size = UDim2.new(0.25, 0, 0.25, 0) -- 1/4 of the screen
-mainFrame.CanvasSize = UDim2.new(0, 0, 1.5, 0) -- Adjust this for scrolling
-mainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-mainFrame.BorderSizePixel = 0
-mainFrame.Visible = false -- Start hidden until toggle is pressed
-mainFrame.ScrollBarThickness = 8
-
--- Adding a title
-local titleLabel = Instance.new("TextLabel")
-titleLabel.Parent = mainFrame
-titleLabel.Position = UDim2.new(0, 0, 0, 0)
-titleLabel.Size = UDim2.new(1, 0, 0, 50)
-titleLabel.BackgroundTransparency = 1
-titleLabel.Font = Enum.Font.SourceSansBold
-titleLabel.Text = "Blair GUI"
-titleLabel.TextSize = 24
-titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-
--- Toggle button to show/hide GUI
-local toggleButton = Instance.new("TextButton")
-toggleButton.Name = "ToggleGUIButton"
-toggleButton.Parent = screenGui
-toggleButton.Size = UDim2.new(0, 100, 0, 50)
-toggleButton.Position = UDim2.new(0, 10, 0, 10)
-toggleButton.BackgroundColor3 = Color3.fromRGB(0, 128, 255)
-toggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-toggleButton.Font = Enum.Font.SourceSansBold
-toggleButton.TextSize = 18
-toggleButton.Text = "Toggle GUI"
-
-toggleButton.MouseButton1Click:Connect(function()
-    mainFrame.Visible = not mainFrame.Visible
-end)
-
--- Creating the Sanity Check Frame
-local sanityFrame = Instance.new("Frame")
-sanityFrame.Name = "SanityFrame"
-sanityFrame.Parent = screenGui
-sanityFrame.AnchorPoint = Vector2.new(0.5, 0)
-sanityFrame.Position = UDim2.new(0.5, 0, 0, 10) -- Positioned at the middle top of the screen
-sanityFrame.Size = UDim2.new(0, 200, 0, 50)
-sanityFrame.BackgroundTransparency = 1 -- Transparent frame
-sanityFrame.BorderSizePixel = 0
-
--- Adding Sanity Text
-local sanityLabel = Instance.new("TextLabel")
-sanityLabel.Parent = sanityFrame
-sanityLabel.Size = UDim2.new(1, 0, 1, 0)
-sanityLabel.BackgroundTransparency = 1
-sanityLabel.Font = Enum.Font.SourceSansBold
-sanityLabel.TextSize = 20
-sanityLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
-sanityLabel.Text = "Sanity: Loading..."
-sanityLabel.TextStrokeTransparency = 0.5
-
--- Function to update Sanity Text continuously
-local player = game:GetService("Players").LocalPlayer
-local sanity = player:WaitForChild("Sanity", 5)
-if sanity then
-    sanity:GetPropertyChangedSignal("Value"):Connect(function()
-        sanityLabel.Text = "Sanity: " .. sanity.Value
-    end)
-else
-    sanityLabel.Text = "Sanity: N/A"
-end
-
 -- Function to add billboards to objects
 local function trackObject(object, text, color)
-    if not object:FindFirstChild(text) then
+    if object and not object:FindFirstChild(text) then
         local billboard = Instance.new("BillboardGui")
         billboard.Adornee = object
         billboard.Name = text
@@ -120,58 +37,44 @@ local function continuousTrack(objectContainer, objectName, displayName, color)
     end
 end
 
--- Check for Crused Items before proceeding
-local function checkCrusedItems()
-    local crusedItems = {}
-    local crusedItemObjects = {}
+-- Check for Cursed Items before proceeding
+local function checkCursedItems()
+    local cursedItems = {}
+    local cursedItemObjects = {}
 
     local ouijaBoard = game:GetService("Workspace"):FindFirstChild("Ouija Board")
     if ouijaBoard then
-        table.insert(crusedItems, "Ouija Board")
-        crusedItemObjects["Ouija Board"] = ouijaBoard
+        table.insert(cursedItems, "Ouija Board")
+        cursedItemObjects["Ouija Board"] = ouijaBoard
     end
 
     local summoningCircle = game:GetService("Workspace"):FindFirstChild("SummoningCircle")
     if summoningCircle then
-        table.insert(crusedItems, "Summoning Circle")
-        crusedItemObjects["Summoning Circle"] = summoningCircle
+        table.insert(cursedItems, "Summoning Circle")
+        cursedItemObjects["Summoning Circle"] = summoningCircle
     end
 
     local tarotCards = game:GetService("Workspace").Map.Items:FindFirstChild("Tarot Cards")
     if tarotCards then
         local tarotCardHandle = tarotCards:FindFirstChild("Handle")
         if tarotCardHandle then
-            table.insert(crusedItems, "Tarot Cards")
-            crusedItemObjects["Tarot Cards"] = tarotCardHandle
+            table.insert(cursedItems, "Tarot Cards")
+            cursedItemObjects["Tarot Cards"] = tarotCardHandle
         end
     end
 
-    return crusedItems, crusedItemObjects
+    return cursedItems, cursedItemObjects
 end
 
-local crusedItems, crusedItemObjects = checkCrusedItems()
+local cursedItems, cursedItemObjects = checkCursedItems()
 
-if #crusedItems == 0 then
-    game.StarterGui:SetCore("SendNotification", {
-        Title = "No Crused Items",
-        Text = "No Crused Items found in the game.",
-        Duration = 3
-    })
-else
-    game.StarterGui:SetCore("SendNotification", {
-        Title = "Crused Items Found",
-        Text = "Found: " .. table.concat(crusedItems, ", "),
-        Duration = 3
-    })
-
-    -- Add billboards for each found Crused Item
-    for itemName, itemObject in pairs(crusedItemObjects) do
+if #cursedItems > 0 then
+    for itemName, itemObject in pairs(cursedItemObjects) do
         local color = itemName == "Ouija Board" and Color3.fromRGB(0, 128, 0) or (itemName == "Summoning Circle" and Color3.fromRGB(255, 140, 0) or Color3.fromRGB(128, 0, 128))
         trackObject(itemObject, itemName, color)
     end
 end
 
--- Continue with the rest of the script even if no Crused Items are found
 -- Set up lighting and other environmental effects
 game:GetService("Lighting").Brightness = 2
 game:GetService("Lighting").ClockTime = 0
@@ -213,5 +116,3 @@ else
         Duration = 2
     })
 end
-
-print("Gui 1 🔵")
