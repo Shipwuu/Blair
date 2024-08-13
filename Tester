@@ -84,8 +84,6 @@ game:GetService("Lighting").OutdoorAmbient = Color3.fromRGB(128, 128, 128)
 
 local map = workspace:FindFirstChild("Map")
 if map then
-    -- Track Generators
-    continuousTrack(map.Generators, "GeneratorMesh", "Generator", Color3.fromRGB(255, 0, 0))
 
     -- Track Orbs
     continuousTrack(map.Orbs, "OrbPart", "Orb", Color3.fromRGB(30, 144, 255))
@@ -96,20 +94,3 @@ else
     warn("Map not found in Workspace.")
 end
 
--- Instant Proximity Prompt Script (runs immediately)
-local ProximityPromptService = game:GetService("ProximityPromptService")
-
-if fireproximityprompt then
-    execCmd("uninstantproximityprompts")
-    wait(0.1)
-    ProximityPromptService.PromptButtonHoldBegan:Connect(function(prompt)
-        fireproximityprompt(prompt)
-    end)
-    print("InstantPP ON")
-else
-    game.StarterGui:SetCore("SendNotification", {
-        Title = "Incompatible Exploit",
-        Text = "Your exploit does not support this command (missing fireproximityprompt)",
-        Duration = 2
-    })
-end
