@@ -46,24 +46,6 @@ safeCall(function()
     titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 end)
 
--- Function to create buttons
-local function createButton(name, text, callback)
-    safeCall(function()
-        local button = Instance.new("TextButton")
-        button.Name = name
-        button.Parent = mainFrame
-        button.Size = UDim2.new(0.8, 0, 0, 40) -- Reduced button size
-        button.Position = UDim2.new(0.1, 0, 0, 60 + (#mainFrame:GetChildren() - 2) * 50)
-        button.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-        button.BorderSizePixel = 0
-        button.TextColor3 = Color3.fromRGB(255, 255, 255)
-        button.Font = Enum.Font.SourceSans
-        button.TextSize = 16 -- Reduced text size
-        button.Text = text
-        button.MouseButton1Click:Connect(callback)
-    end)
-end
-
 -- Toggle button to show/hide Blair GUI
 safeCall(function()
     local toggleButton = Instance.new("TextButton")
@@ -206,14 +188,10 @@ safeCall(function()
             Duration = 3
         })
 
-        -- Add billboards and teleport buttons for each found Crused Item
+        -- Add billboards for each found Crused Item
         for itemName, itemObject in pairs(crusedItemObjects) do
             local color = itemName == "Ouija Board" and Color3.fromRGB(0, 128, 0) or (itemName == "Summoning Circle" and Color3.fromRGB(255, 140, 0) or Color3.fromRGB(128, 0, 128))
             trackObject(itemObject, itemName, color)
-            
-            createButton("TpTo" .. itemName, "Teleport to " .. itemName, function()
-                game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame = itemObject.CFrame
-            end)
         end
     end
 end)
@@ -242,37 +220,6 @@ if map then
 
     -- Track Prints
     continuousTrack(map.Prints, "UV_Hand", "Fingerprint", Color3.fromRGB(75, 0, 130))
-
-    -- Adding teleport buttons for Generator and Van
-    createButton("TpToGenerator", "Teleport to Generator", function()
-        safeCall(function()
-            local generator = map.Generators:FindFirstChild("GeneratorMesh")
-            if generator then
-                game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame = generator.CFrame
-            else
-                game.StarterGui:SetCore("SendNotification", {
-                    Title = "Error",
-                    Text = "Generator not found",
-                    Duration = 2
-                })
-            end
-        end)
-    end)
-
-    createButton("TpToVan", "Teleport to Van", function()
-        safeCall(function()
-            local van = map.Van:FindFirstChild("SpawnLocation")
-            if van then
-                game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame = van.CFrame
-            else
-                game.StarterGui:SetCore("SendNotification", {
-                    Title = "Error",
-                    Text = "Van not found",
-                    Duration = 2
-                })
-            end
-        end)
-    end)
 else
     warn("Map not found in Workspace.")
 end
@@ -284,4 +231,4 @@ safeCall(function()
     end)
 end)
 
-print("ooooo")
+print("Gui 1 🔵")
