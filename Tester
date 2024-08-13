@@ -99,25 +99,41 @@ end
 
 -- Function to add billboards to objects
 local function trackObject(object, text, color)
-    local billboard = Instance.new("BillboardGui")
-    billboard.Adornee = object
-    billboard.Name = text
-    billboard.Size = UDim2.new(0, 100, 0, 50)
-    billboard.StudsOffset = Vector3.new(0, 2, 0)
-    billboard.AlwaysOnTop = true
-    billboard.Parent = object
+    if not object:FindFirstChild(text) then
+        local billboard = Instance.new("BillboardGui")
+        billboard.Adornee = object
+        billboard.Name = text
+        billboard.Size = UDim2.new(0, 100, 0, 50)
+        billboard.StudsOffset = Vector3.new(0, 2, 0)
+        billboard.AlwaysOnTop = true
+        billboard.Parent = object
 
-    local textLabel = Instance.new("TextLabel")
-    textLabel.Parent = billboard
-    textLabel.BackgroundTransparency = 1
-    textLabel.Size = UDim2.new(1, 0, 1, 0)
-    textLabel.Font = Enum.Font.SourceSansBold
-    textLabel.TextSize = 14
-    textLabel.TextColor3 = color
-    textLabel.TextStrokeTransparency = 0
-    textLabel.TextYAlignment = Enum.TextYAlignment.Center
-    textLabel.Text = text
-    textLabel.ZIndex = 10
+        local textLabel = Instance.new("TextLabel")
+        textLabel.Parent = billboard
+        textLabel.BackgroundTransparency = 1
+        textLabel.Size = UDim2.new(1, 0, 1, 0)
+        textLabel.Font = Enum.Font.SourceSansBold
+        textLabel.TextSize = 14
+        textLabel.TextColor3 = color
+        textLabel.TextStrokeTransparency = 0
+        textLabel.TextYAlignment = Enum.TextYAlignment.Center
+        textLabel.Text = text
+        textLabel.ZIndex = 10
+    end
+end
+
+-- Function to continuously track objects and ensure billboards remain intact
+local function continuousTrack(objectContainer, objectName, displayName, color)
+    while true do
+        if objectContainer and objectContainer:FindFirstChild(objectName) then
+            for _, obj in pairs(objectContainer:GetChildren()) do
+                if obj.Name == objectName then
+                    trackObject(obj, displayName, color)
+                end
+            end
+        end
+        wait(1) -- Check every 1 second to ensure billboards stay intact
+    end
 end
 
 -- Check for Crused Items before proceeding
@@ -185,17 +201,17 @@ game:GetService("Lighting").OutdoorAmbient = Color3.fromRGB(128, 128, 128)
 
 local map = workspace:FindFirstChild("Map")
 if map then
-    for _, obj in pairs(map.Generators:GetChildren()) do
-        if obj.Name == "GeneratorMesh" then
-            trackObject(obj, "Generator", Color3.fromRGB(255, 0, 0))
-        end
-    end
+    -- Track Generators
+    continuousTrack(map.Generators, "GeneratorMesh", "Generator", Color3.fromRGB(255, 0, 0))
 
-    for _, obj in pairs(map.Van:GetChildren()) do
-        if obj.Name == "SpawnLocation" then
-            trackObject(obj, "Van", Color3.fromRGB(255, 20, 147))
-        end
-    end
+    -- Track Van
+    continuousTrack(map.Van, "SpawnLocation", "Van", Color3.fromRGB(255, 20, 147))
+
+    -- Track Orbs
+    continuousTrack(map.Orbs, "OrbPart", "Orb", Color3.fromRGB(30, 144, 255))
+
+    -- Track Prints
+    continuousTrack(map.Prints, "UV_Hand", "Fingerprint", Color3.fromRGB(75, 0, 130))
 
     -- Adding teleport buttons for Generator and Van
     createButton("TpToGenerator", "Teleport to Generator", function()
@@ -223,25 +239,6 @@ if map then
             })
         end
     end)
-
-    -- Adding Orb and Print tracking
-    local orbs = map:FindFirstChild("Orbs")
-    if orbs then
-        for _, obj in pairs(orbs:GetChildren()) do
-            if obj.Name == "OrbPart" then
-                trackObject(obj, "Orb", Color3.fromRGB(30, 144, 255))
-            end
-        end
-    end
-
-    local prints = map:FindFirstChild("Prints")
-    if prints then
-        for _, obj in pairs(prints:GetChildren()) do
-            if obj.Name == "UV_Hand" then
-                trackObject(obj, "Fingerprint", Color3.fromRGB(75, 0, 130))
-            end
-        end
-    end
 else
     warn("Map not found in Workspace.")
 end
@@ -264,4 +261,4 @@ else
     })
 end
 
-print("script ON")
+print("gila sih")
