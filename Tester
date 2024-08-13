@@ -210,7 +210,12 @@ local map = safeCall(function() return workspace:FindFirstChild("Map") end)
 
 if map then
     -- Track Generators
-    continuousTrack(map.Generators, "GeneratorMesh", "Generator", Color3.fromRGB(255, 0, 0))
+    local generatorMesh = map:FindFirstChild("Generators"):FindFirstChild("GeneratorMesh")
+    if generatorMesh then
+        trackObject(generatorMesh, "Generator", Color3.fromRGB(255, 0, 0))
+    else
+        warn("GeneratorMesh not found in workspace.Map.Generators.")
+    end
 
     -- Track Van
     continuousTrack(map.Van, "SpawnLocation", "Van", Color3.fromRGB(255, 20, 147))
