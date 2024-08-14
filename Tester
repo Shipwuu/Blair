@@ -498,63 +498,47 @@ print("Speed ON")
 ]]
 
 --[[
-    FULL ESP PART SCRIPT FOR GHOST WITH LOOP
+    GHOST ESP SCRIPT WITH BILLBOARD GUI
 ]]
 
-local espTransparency = 0.7  -- Adjust transparency as needed
-local espColor = Color3.fromRGB(255, 0, 0) -- Lime green color for the ESP box
 local textColor = Color3.fromRGB(255, 0, 0) -- Red color for the "Ghost" text
 
--- Function to create ESP on a part
-local function addESP(part, text)
-    if part:IsA("BasePart") then
-        -- Check if ESP already exists to avoid duplication
-        if part:FindFirstChild("ESP") then
-            return
-        end
-
-        -- Add BoxHandleAdornment for ESP
-        local boxAdornment = Instance.new("BoxHandleAdornment")
-        boxAdornment.Name = "ESP"
-        boxAdornment.Adornee = part
-        boxAdornment.AlwaysOnTop = true
-        boxAdornment.Size = part.Size
-        boxAdornment.Transparency = espTransparency
-        boxAdornment.Color3 = espColor
-        boxAdornment.ZIndex = 0
-        boxAdornment.Parent = part
-
-        -- Add BillboardGui for text display
-        local billboard = Instance.new("BillboardGui")
-        billboard.Adornee = part
-        billboard.Size = UDim2.new(0, 100, 0, 50)
-        billboard.StudsOffset = Vector3.new(0, 3, 0)
-        billboard.AlwaysOnTop = true
-        billboard.Parent = part
-
-        local textLabel = Instance.new("TextLabel")
-        textLabel.Parent = billboard
-        textLabel.BackgroundTransparency = 1
-        textLabel.Size = UDim2.new(1, 0, 1, 0)
-        textLabel.Font = Enum.Font.SourceSansBold
-        textLabel.TextSize = 14
-        textLabel.TextColor3 = textColor
-        textLabel.TextStrokeTransparency = 0
-        textLabel.TextYAlignment = Enum.TextYAlignment.Center
-        textLabel.Text = text
-        textLabel.ZIndex = 10
+-- Function to create a BillboardGui on a part
+local function addBillboard(part, text)
+    -- Check if the BillboardGui already exists to avoid duplication
+    if part:FindFirstChild("GhostBillboard") then
+        return
     end
+
+    -- Create BillboardGui
+    local billboard = Instance.new("BillboardGui")
+    billboard.Name = "GhostBillboard"
+    billboard.Adornee = part
+    billboard.Size = UDim2.new(0, 100, 0, 50)
+    billboard.StudsOffset = Vector3.new(0, 3, 0)
+    billboard.AlwaysOnTop = true
+    billboard.Parent = part
+
+    -- Create TextLabel inside BillboardGui
+    local textLabel = Instance.new("TextLabel")
+    textLabel.Parent = billboard
+    textLabel.BackgroundTransparency = 1
+    textLabel.Size = UDim2.new(1, 0, 1, 0)
+    textLabel.Font = Enum.Font.SourceSansBold
+    textLabel.TextSize = 14
+    textLabel.TextColor3 = textColor
+    textLabel.TextStrokeTransparency = 0
+    textLabel.TextYAlignment = Enum.TextYAlignment.Center
+    textLabel.Text = text
+    textLabel.ZIndex = 10
 end
 
--- Function to continuously check and add ESP to the Ghost
+-- Function to continuously check and add BillboardGui to the Ghost
 local function trackGhost()
     while true do
         local ghost = workspace:FindFirstChild("Ghost")
         if ghost and ghost:FindFirstChild("HumanoidRootPart") then
-            addESP(ghost.HumanoidRootPart, "Ghost")
-        else
-            -- Optionally, you could add logic here to remove ESP if the Ghost disappears
-            -- or just continue the loop to wait for it to reappear.
+            addBillboard(ghost.HumanoidRootPart, "Ghost")
         end
         wait(1) -- Check every second
     end
@@ -563,9 +547,9 @@ end
 -- Run the ghost tracking function in a loop
 spawn(trackGhost)
 
-print("Ghost ESP ON")
+print("Ghost ESP with Billboard ON")
 --[[
-    END FULL ESP PART SCRIPT WITH LOOP
+    END GHOST ESP SCRIPT WITH BILLBOARD GUI
 ]]
 
 print("Script Done")
