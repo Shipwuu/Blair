@@ -1,1 +1,70 @@
-workspace.Ghost
+--[[
+    GHOST ESP SCRIPT WITH DYNAMIC DETECTION
+]]
+
+local textColor = Color3.fromRGB(255, 0, 0) -- Red color for the "Ghost" text
+local isTracking = false -- Flag to control the tracking loop
+
+-- Function to create a BillboardGui on a part
+local function addBillboard(part, text)
+    -- Check if the BillboardGui already exists to avoid duplication
+    if part:FindFirstChild("GhostBillboard") then
+        return
+    end
+
+    -- Create BillboardGui
+    local billboard = Instance.new("BillboardGui")
+    billboard.Name = "GhostBillboard"
+    billboard.Adornee = part
+    billboard.Size = UDim2.new(0, 100, 0, 50)
+    billboard.StudsOffset = Vector3.new(0, 3, 0)
+    billboard.AlwaysOnTop = true
+    billboard.Parent = part
+
+    -- Create TextLabel inside BillboardGui
+    local textLabel = Instance.new("TextLabel")
+    textLabel.Parent = billboard
+    textLabel.BackgroundTransparency = 1
+    textLabel.Size = UDim2.new(1, 0, 1, 0)
+    textLabel.Font = Enum.Font.SourceSansBold
+    textLabel.TextSize = 14
+    textLabel.TextColor3 = textColor
+    textLabel.TextStrokeTransparency = 0
+    textLabel.TextYAlignment = Enum.TextYAlignment.Center
+    textLabel.Text = text
+    textLabel.ZIndex = 10
+end
+
+-- Function to continuously check for the Ghost's presence
+local function trackGhost()
+    while true do
+        local ghost = workspace:FindFirstChild("Ghost")
+        
+        if ghost and ghost:FindFirstChild("HumanoidRootPart") then
+            if not isTracking then
+                print("Ghost detected. Starting ESP.")
+                isTracking = true
+                addBillboard(ghost.HumanoidRootPart, "Ghost")
+            end
+        else
+            if isTracking then
+                print("Ghost disappeared. Stopping ESP.")
+                isTracking = false
+                -- Remove existing BillboardGui if the ghost disappears
+                if workspace:FindFirstChild("GhostBillboard") then
+                    workspace:FindFirstChild("GhostBillboard"):Destroy()
+                end
+            end
+        end
+
+        wait(1) -- Check every second
+    end
+end
+
+-- Start the ghost tracking function
+spawn(trackGhost)
+
+print("Ghost ESP with dynamic detection script is running")
+--[[
+    END GHOST ESP SCRIPT WITH DYNAMIC DETECTION
+]]
