@@ -212,7 +212,7 @@ local RunService = game:GetService("RunService")
 local COREGUI = game:GetService("CoreGui")
 local LocalPlayer = Players.LocalPlayer
 
--- Variabel
+-- Variables
 local ESPenabled = true  -- Set to true to enable ESP by default
 local espTransparency = 0.4  -- Adjust transparency as needed
 local friends = {}
@@ -397,7 +397,6 @@ local speedStep = 2 -- Increment/Decrement step for speed
 local function setWalkSpeed(speed)
     if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
         LocalPlayer.Character.Humanoid.WalkSpeed = speed
-        
     end
 end
 
@@ -495,7 +494,7 @@ end
 
 print("Speed ON")
 --[[
-END SPEED SCRIPT
+	END SPEED SCRIPT
 ]]
 
 --[[
@@ -510,11 +509,30 @@ local function trackGhost()
                 boxAdornment.Adornee = ghost.HumanoidRootPart
                 boxAdornment.AlwaysOnTop = true
                 boxAdornment.Color3 = Color3.fromRGB(255, 0, 0)
-                boxAdornment.Size = Vector3.new(2, 2, 1)
+                boxAdornment.Size = ghost.HumanoidRootPart.Size
                 boxAdornment.Transparency = 0.5
                 boxAdornment.ZIndex = 2
-                boxAdornment.Parent = ghost
+                boxAdornment.Parent = ghost.HumanoidRootPart
                 boxAdornment.Name = "ESP"
+                
+                local billboard = Instance.new("BillboardGui")
+                billboard.Adornee = ghost.HumanoidRootPart
+                billboard.Size = UDim2.new(0, 100, 0, 50)
+                billboard.StudsOffset = Vector3.new(0, 3, 0)
+                billboard.AlwaysOnTop = true
+                billboard.Parent = ghost
+
+                local textLabel = Instance.new("TextLabel")
+                textLabel.Parent = billboard
+                textLabel.BackgroundTransparency = 1
+                textLabel.Size = UDim2.new(1, 0, 1, 0)
+                textLabel.Font = Enum.Font.SourceSansBold
+                textLabel.TextSize = 14
+                textLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
+                textLabel.TextStrokeTransparency = 0
+                textLabel.TextYAlignment = Enum.TextYAlignment.Center
+                textLabel.Text = "GHOST"
+                textLabel.ZIndex = 10
             end
         end
         wait(1)
