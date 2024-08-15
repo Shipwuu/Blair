@@ -2,25 +2,53 @@
     GHOST HUNTING WARNING SCRIPT
 ]]
 
-local guiTransparency = 0.7 -- Transparency of the warning GUI label
-local warningDuration = 8 -- Time to differentiate between "Hunting" and "Ghost Event"
+-- Function to create or update GUI for hunt display
+local function createHuntDisplay()
+    local screenGui = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+    
+    local huntFrame = Instance.new("Frame")
+    huntFrame.Name = "HuntFrame"
+    huntFrame.Size = UDim2.new(1, 0, 0, 30)  -- Full width, same height
+    huntFrame.Position = UDim2.new(0, 0, 0, 0)  -- Positioned at the top of the screen
+    huntFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    huntFrame.BackgroundTransparency = 0.7  -- More transparency
+    huntFrame.BorderSizePixel = 0  -- Removed border
+    huntFrame.Visible = false
+    huntFrame.Parent = screenGui
 
--- Function to create a BillboardGui on the last known position of the Ghost
-local function addGhostGoneBillboard(position)
-    -- Create BillboardGui
+    local huntLabel = Instance.new("TextLabel")
+    huntLabel.Size = UDim2.new(1, 0, 1, 0)
+    huntLabel.BackgroundTransparency = 1
+    huntLabel.Font = Enum.Font.SourceSans
+    huntLabel.TextSize = 18
+    huntLabel.TextColor3 = Color3.fromRGB(255, 255, 255)  -- White color for text
+    huntLabel.Text = "Hunting"
+    huntLabel.TextStrokeTransparency = 0.5
+    huntLabel.TextXAlignment = Enum.TextXAlignment.Center
+    huntLabel.TextYAlignment = Enum.TextYAlignment.Center
+    huntLabel.Parent = huntFrame
+    
+    return huntFrame
+end
+
+-- Function to create a BillboardGui at the ghost's last known position
+local function createGhostGoneBillboard(position)
+    -- Create a part to anchor the BillboardGui
+    local anchorPart = Instance.new("Part")
+    anchorPart.Anchored = true
+    anchorPart.CanCollide = false
+    anchorPart.Transparency = 1 -- Make the part invisible
+    anchorPart.Position = position
+    anchorPart.Parent = workspace
+
+    -- Create the BillboardGui
     local billboard = Instance.new("BillboardGui")
-    billboard.Name = "GhostGoneBillboard"
+    billboard.Adornee = anchorPart
     billboard.Size = UDim2.new(0, 100, 0, 50)
     billboard.StudsOffset = Vector3.new(0, 3, 0)
     billboard.AlwaysOnTop = true
-    billboard.Adornee = Instance.new("Part", workspace) -- Create an invisible part at the Ghost's last position
-    billboard.Adornee.Position = position
-    billboard.Parent = billboard.Adornee
-    billboard.Adornee.Anchored = true
-    billboard.Adornee.CanCollide = false
-    billboard.Adornee.Transparency = 1 -- Make the part invisible
+    billboard.Parent = anchorPart
 
-    -- Create TextLabel inside BillboardGui
     local textLabel = Instance.new("TextLabel")
     textLabel.Parent = billboard
     textLabel.BackgroundTransparency = 1
@@ -32,75 +60,76 @@ local function addGhostGoneBillboard(position)
     textLabel.TextYAlignment = Enum.TextYAlignment.Center
     textLabel.Text = "Ghost Gone"
     textLabel.ZIndex = 10
-end
 
--- Function to create a scrolling warning GUI label
-local function createWarningLabel()
-    local warningLabel = Instance.new("TextLabel")
-    warningLabel.Name = "WarningLabel"
-    warningLabel.Size = UDim2.new(1, 0, 0, 50) -- Full width, height 50
-    warningLabel.Position = UDim2.new(1, 0, 0, 0) -- Start off-screen to the right
-    warningLabel.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-    warningLabel.BackgroundTransparency = guiTransparency
-    warningLabel.Font = Enum.Font.SourceSansBold
-    warningLabel.TextSize = 24
-    warningLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-    warningLabel.TextStrokeTransparency = 0
-    warningLabel.TextYAlignment = Enum.TextYAlignment.Center
-    warningLabel.Text = "Hunting"
-    warningLabel.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
-    
-    -- Animate the label from right to left
-    local tweenService = game:GetService("TweenService")
-    local tweenInfo = TweenInfo.new(3, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
-    local goal = {Position = UDim2.new(-1, 0, 0, 0)} -- Move off-screen to the left
-    local tween = tweenService:Create(warningLabel, tweenInfo, goal)
-    tween:Play()
-    
-    -- Destroy the label after animation is complete
-    tween.Completed:Connect(function()
-        warningLabel:Destroy()
+    -- Optionally, remove the Billboard after some time
+    delay(10, function()
+        anchorPart:Destroy() -- Remove the part and billboard after 10 seconds
     end)
 end
 
--- Function to continuously check the Ghost's state
-local function trackGhostState()
-    local ghost
-    local ghostStartTime
-    while true do
-        ghost = workspace:FindFirstChild("Ghost")
+-- Function to monitor ghost hunting and events
+local function monitorGhostHunting()
+    local huntFrame = createHuntDisplay()
+    
+    local function updateHuntDisplay(isHunting)
+        if isHunting then
+            huntFrame.BackgroundColor3 = Color3.fromRGB(255, 0, 0)  -- Red color for hunting
+        else
+            huntFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)  -- Black color for ghost event
+        end
+        huntFrame.Visible = isHunting
+    end
+    
+    local ghostStartTime = nil
+    local lastGhostPosition = nil
+    
+    game:GetService("RunService").RenderStepped:Connect(function()
+        local Ghost = workspace:FindFirstChild("Ghost")
+        local isHunting = false
         
-        if ghost and ghost:FindFirstChild("HumanoidRootPart") then
-            if not ghostStartTime then
-                -- Ghost starts appearing, start timer
-                ghostStartTime = tick()
-                createWarningLabel()
-                print("Ghost detected. Warning started.")
+        if Ghost then
+            local rootPart = Ghost:FindFirstChild("HumanoidRootPart")
+            if rootPart and rootPart.Transparency == 0 then
+                if not ghostStartTime then
+                    ghostStartTime = tick()  -- Start the timer when the ghost appears
+                end
+                
+                lastGhostPosition = rootPart.Position
+                
+                local elapsedTime = tick() - ghostStartTime
+                if elapsedTime > 8 then
+                    isHunting = true  -- Consider hunting if ghost is visible for more than 8 seconds
+                else
+                    isHunting = false  -- Consider it a ghost event otherwise
+                end
+                
+                updateHuntDisplay(isHunting)
+            else
+                if lastGhostPosition then
+                    -- Ghost disappeared, create a "Ghost Gone" billboard at the last known position
+                    createGhostGoneBillboard(lastGhostPosition)
+                end
+                
+                ghostStartTime = nil  -- Reset timer if the ghost is not visible
+                huntFrame.Visible = false
             end
         else
-            if ghostStartTime then
-                local elapsedTime = tick() - ghostStartTime
-                if elapsedTime < warningDuration then
-                    print("Ghost Event ended.")
-                else
-                    print("Hunting ended.")
-                end
-
-                -- Add "Ghost Gone" BillboardGui at the last known position
-                addGhostGoneBillboard(ghost and ghost.HumanoidRootPart.Position or Vector3.new(0, 0, 0))
-                
-                ghostStartTime = nil
+            if lastGhostPosition then
+                -- Ghost disappeared, create a "Ghost Gone" billboard at the last known position
+                createGhostGoneBillboard(lastGhostPosition)
             end
+            
+            ghostStartTime = nil  -- Reset timer if the ghost disappears
+            huntFrame.Visible = false
         end
-
-        wait(1) -- Check every second
-    end
+    end)
 end
 
--- Start the ghost tracking function
-spawn(trackGhostState)
+-- Start monitoring ghost hunting and events
+monitorGhostHunting()
 
-print("Ghost Hunting Warning Script is running")
+print("Ghost Hunting and Event Monitor Script with Position Clue is running")
+
 --[[
     END GHOST HUNTING WARNING SCRIPT
 ]]
