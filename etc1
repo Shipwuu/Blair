@@ -88,31 +88,20 @@ local function monitorGhostHunting()
         local isHunting = false
         
         if Ghost then
-            local rootPart = Ghost:FindFirstChild("HumanoidRootPart")
-            if rootPart and rootPart.Transparency == 0 then
-                if not ghostStartTime then
-                    ghostStartTime = tick()  -- Start the timer when the ghost appears
-                end
-                
-                lastGhostPosition = rootPart.Position
-                
-                local elapsedTime = tick() - ghostStartTime
-                if elapsedTime > 8 then
-                    isHunting = true  -- Consider hunting if ghost is visible for more than 8 seconds
-                else
-                    isHunting = false  -- Consider it a ghost event otherwise
-                end
-                
-                updateHuntDisplay(isHunting)
-            else
-                if lastGhostPosition then
-                    -- Ghost disappeared, create a "Ghost Gone" billboard at the last known position
-                    createGhostGoneBillboard(lastGhostPosition)
-                end
-                
-                ghostStartTime = nil  -- Reset timer if the ghost is not visible
-                huntFrame.Visible = false
+            lastGhostPosition = Ghost.Position -- Track the Ghost's position directly
+            
+            if not ghostStartTime then
+                ghostStartTime = tick()  -- Start the timer when the ghost appears
             end
+            
+            local elapsedTime = tick() - ghostStartTime
+            if elapsedTime > 8 then
+                isHunting = true  -- Consider hunting if ghost is visible for more than 8 seconds
+            else
+                isHunting = false  -- Consider it a ghost event otherwise
+            end
+            
+            updateHuntDisplay(isHunting)
         else
             if lastGhostPosition then
                 -- Ghost disappeared, create a "Ghost Gone" billboard at the last known position
