@@ -1,0 +1,106 @@
+--[[
+    GHOST HUNTING WARNING SCRIPT
+]]
+
+local guiTransparency = 0.7 -- Transparency of the warning GUI label
+local warningDuration = 8 -- Time to differentiate between "Hunting" and "Ghost Event"
+
+-- Function to create a BillboardGui on the last known position of the Ghost
+local function addGhostGoneBillboard(position)
+    -- Create BillboardGui
+    local billboard = Instance.new("BillboardGui")
+    billboard.Name = "GhostGoneBillboard"
+    billboard.Size = UDim2.new(0, 100, 0, 50)
+    billboard.StudsOffset = Vector3.new(0, 3, 0)
+    billboard.AlwaysOnTop = true
+    billboard.Adornee = Instance.new("Part", workspace) -- Create an invisible part at the Ghost's last position
+    billboard.Adornee.Position = position
+    billboard.Parent = billboard.Adornee
+    billboard.Adornee.Anchored = true
+    billboard.Adornee.CanCollide = false
+    billboard.Adornee.Transparency = 1 -- Make the part invisible
+
+    -- Create TextLabel inside BillboardGui
+    local textLabel = Instance.new("TextLabel")
+    textLabel.Parent = billboard
+    textLabel.BackgroundTransparency = 1
+    textLabel.Size = UDim2.new(1, 0, 1, 0)
+    textLabel.Font = Enum.Font.SourceSansBold
+    textLabel.TextSize = 14
+    textLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
+    textLabel.TextStrokeTransparency = 0
+    textLabel.TextYAlignment = Enum.TextYAlignment.Center
+    textLabel.Text = "Ghost Gone"
+    textLabel.ZIndex = 10
+end
+
+-- Function to create a scrolling warning GUI label
+local function createWarningLabel()
+    local warningLabel = Instance.new("TextLabel")
+    warningLabel.Name = "WarningLabel"
+    warningLabel.Size = UDim2.new(1, 0, 0, 50) -- Full width, height 50
+    warningLabel.Position = UDim2.new(1, 0, 0, 0) -- Start off-screen to the right
+    warningLabel.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+    warningLabel.BackgroundTransparency = guiTransparency
+    warningLabel.Font = Enum.Font.SourceSansBold
+    warningLabel.TextSize = 24
+    warningLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    warningLabel.TextStrokeTransparency = 0
+    warningLabel.TextYAlignment = Enum.TextYAlignment.Center
+    warningLabel.Text = "Hunting"
+    warningLabel.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+    
+    -- Animate the label from right to left
+    local tweenService = game:GetService("TweenService")
+    local tweenInfo = TweenInfo.new(3, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
+    local goal = {Position = UDim2.new(-1, 0, 0, 0)} -- Move off-screen to the left
+    local tween = tweenService:Create(warningLabel, tweenInfo, goal)
+    tween:Play()
+    
+    -- Destroy the label after animation is complete
+    tween.Completed:Connect(function()
+        warningLabel:Destroy()
+    end)
+end
+
+-- Function to continuously check the Ghost's state
+local function trackGhostState()
+    local ghost
+    local ghostStartTime
+    while true do
+        ghost = workspace:FindFirstChild("Ghost")
+        
+        if ghost and ghost:FindFirstChild("HumanoidRootPart") then
+            if not ghostStartTime then
+                -- Ghost starts appearing, start timer
+                ghostStartTime = tick()
+                createWarningLabel()
+                print("Ghost detected. Warning started.")
+            end
+        else
+            if ghostStartTime then
+                local elapsedTime = tick() - ghostStartTime
+                if elapsedTime < warningDuration then
+                    print("Ghost Event ended.")
+                else
+                    print("Hunting ended.")
+                end
+
+                -- Add "Ghost Gone" BillboardGui at the last known position
+                addGhostGoneBillboard(ghost and ghost.HumanoidRootPart.Position or Vector3.new(0, 0, 0))
+                
+                ghostStartTime = nil
+            end
+        end
+
+        wait(1) -- Check every second
+    end
+end
+
+-- Start the ghost tracking function
+spawn(trackGhostState)
+
+print("Ghost Hunting Warning Script is running")
+--[[
+    END GHOST HUNTING WARNING SCRIPT
+]]
