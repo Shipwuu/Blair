@@ -22,7 +22,7 @@ local function createFameHuntingDisplay()
     local fameHuntLabel = Instance.new("TextLabel")
     fameHuntLabel.Size = UDim2.new(1, 0, 1, 0)
     fameHuntLabel.BackgroundTransparency = 1
-    fameHuntLabel.Font = Enum.Font.SourceSans
+    fameHuntLabel.Font = Enum.Font.SourceSansBold
     fameHuntLabel.TextSize = 18
     fameHuntLabel.TextColor3 = Color3.fromRGB(255, 255, 255)  -- White color for text
     fameHuntLabel.Text = "Fame Hunting"
@@ -55,8 +55,8 @@ local function addBillboard(part, text)
     textLabel.Parent = billboard
     textLabel.BackgroundTransparency = 1
     textLabel.Size = UDim2.new(1, 0, 1, 0)
-    textLabel.Font = Enum.Font.SourceSansBold
-    textLabel.TextSize = 14
+    textLabel.Font = Enum.Font.Arcade
+    textLabel.TextSize = 22
     textLabel.TextColor3 = textColor
     textLabel.TextStrokeTransparency = 0
     textLabel.TextYAlignment = Enum.TextYAlignment.Center
