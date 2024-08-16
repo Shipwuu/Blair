@@ -1,9 +1,38 @@
 --[[
-    GHOST ESP SCRIPT WITH DYNAMIC DETECTION
+    GHOST ESP SCRIPT WITH DYNAMIC DETECTION AND HUNT FRAME
 ]]
 
 local textColor = Color3.fromRGB(255, 0, 0) -- Red color for the "Ghost" text
 local isTracking = false -- Flag to control the tracking loop
+
+-- Function to create or update GUI for hunt display
+local function createHuntDisplay()
+    local screenGui = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+    
+    local huntFrame = Instance.new("Frame")
+    huntFrame.Name = "HuntFrame"
+    huntFrame.Size = UDim2.new(1, 0, 0, 30)  -- Full width, height of 30 pixels
+    huntFrame.Position = UDim2.new(0, 0, 0, 0)  -- Positioned at the top of the screen
+    huntFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    huntFrame.BackgroundTransparency = 0.7  -- More transparency
+    huntFrame.BorderSizePixel = 0  -- Removed border
+    huntFrame.Visible = false
+    huntFrame.Parent = screenGui
+
+    local huntLabel = Instance.new("TextLabel")
+    huntLabel.Size = UDim2.new(1, 0, 1, 0)
+    huntLabel.BackgroundTransparency = 1
+    huntLabel.Font = Enum.Font.SourceSans
+    huntLabel.TextSize = 18
+    huntLabel.TextColor3 = Color3.fromRGB(255, 255, 255)  -- White color for text
+    huntLabel.Text = "Hunting"
+    huntLabel.TextStrokeTransparency = 0.5
+    huntLabel.TextXAlignment = Enum.TextXAlignment.Center
+    huntLabel.TextYAlignment = Enum.TextYAlignment.Center
+    huntLabel.Parent = huntFrame
+    
+    return huntFrame
+end
 
 -- Function to create a BillboardGui on a part
 local function addBillboard(part, text)
@@ -37,14 +66,17 @@ end
 
 -- Function to continuously check for the Ghost's presence
 local function trackGhost()
+    local huntFrame = createHuntDisplay() -- Create and reference huntFrame here
+
     while true do
         local ghost = workspace:FindFirstChild("Ghost")
         
-        if ghost and ghost:FindFirstChild("HumanoidRootPart") then
+        if ghost then
             if not isTracking then
                 print("Ghost detected. Starting ESP.")
                 isTracking = true
-                addBillboard(ghost.HumanoidRootPart, "Ghost")
+                addBillboard(ghost, "Ghost")
+                huntFrame.Visible = true  -- Show the huntFrame when the ghost is detected
             end
         else
             if isTracking then
@@ -54,6 +86,7 @@ local function trackGhost()
                 if workspace:FindFirstChild("GhostBillboard") then
                     workspace:FindFirstChild("GhostBillboard"):Destroy()
                 end
+                huntFrame.Visible = false  -- Hide the huntFrame when the ghost disappears
             end
         end
 
@@ -64,7 +97,7 @@ end
 -- Start the ghost tracking function
 spawn(trackGhost)
 
-print("Ghost ESP with dynamic detection script is running")
+print("Ghost ESP with dynamic detection and huntFrame script is running")
 --[[
-    END GHOST ESP SCRIPT WITH DYNAMIC DETECTION
+    END GHOST ESP SCRIPT WITH DYNAMIC DETECTION AND HUNT FRAME
 ]]
