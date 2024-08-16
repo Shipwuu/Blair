@@ -1,124 +1,103 @@
 --[[
-    GHOST HUNTING WARNING SCRIPT
+    GHOST ESP SCRIPT WITH DYNAMIC DETECTION AND FAME HUNTING FRAME
 ]]
 
--- Function to create or update GUI for hunt display
-local function createHuntDisplay()
+local textColor = Color3.fromRGB(255, 0, 0) -- Red color for the "Ghost" text
+local isTracking = false -- Flag to control the tracking loop
+
+-- Function to create or update GUI for fame hunting display
+local function createFameHuntingDisplay()
     local screenGui = game.Players.LocalPlayer:WaitForChild("PlayerGui")
     
-    local huntFrame = Instance.new("Frame")
-    huntFrame.Name = "HuntFrame"
-    huntFrame.Size = UDim2.new(1, 0, 0, 30)  -- Full width, same height
-    huntFrame.Position = UDim2.new(0, 0, 0, 0)  -- Positioned at the top of the screen
-    huntFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    huntFrame.BackgroundTransparency = 0.7  -- More transparency
-    huntFrame.BorderSizePixel = 0  -- Removed border
-    huntFrame.Visible = false
-    huntFrame.Parent = screenGui
+    local fameHuntFrame = Instance.new("Frame")
+    fameHuntFrame.Name = "FameHuntFrame"
+    fameHuntFrame.Size = UDim2.new(1, 0, 0, 30)  -- Full width, height of 30 pixels
+    fameHuntFrame.Position = UDim2.new(0, 0, 0, 0)  -- Positioned at the top of the screen
+    fameHuntFrame.BackgroundColor3 = Color3.fromRGB(255, 0, 0)  -- Red color for fame hunting frame
+    fameHuntFrame.BackgroundTransparency = 0.7  -- More transparency
+    fameHuntFrame.BorderSizePixel = 0  -- Removed border
+    fameHuntFrame.Visible = false
+    fameHuntFrame.Parent = screenGui
 
-    local huntLabel = Instance.new("TextLabel")
-    huntLabel.Size = UDim2.new(1, 0, 1, 0)
-    huntLabel.BackgroundTransparency = 1
-    huntLabel.Font = Enum.Font.SourceSans
-    huntLabel.TextSize = 18
-    huntLabel.TextColor3 = Color3.fromRGB(255, 255, 255)  -- White color for text
-    huntLabel.Text = "Hunting"
-    huntLabel.TextStrokeTransparency = 0.5
-    huntLabel.TextXAlignment = Enum.TextXAlignment.Center
-    huntLabel.TextYAlignment = Enum.TextYAlignment.Center
-    huntLabel.Parent = huntFrame
+    local fameHuntLabel = Instance.new("TextLabel")
+    fameHuntLabel.Size = UDim2.new(1, 0, 1, 0)
+    fameHuntLabel.BackgroundTransparency = 1
+    fameHuntLabel.Font = Enum.Font.SourceSans
+    fameHuntLabel.TextSize = 18
+    fameHuntLabel.TextColor3 = Color3.fromRGB(255, 255, 255)  -- White color for text
+    fameHuntLabel.Text = "Fame Hunting"
+    fameHuntLabel.TextStrokeTransparency = 0.5
+    fameHuntLabel.TextXAlignment = Enum.TextXAlignment.Center
+    fameHuntLabel.TextYAlignment = Enum.TextYAlignment.Center
+    fameHuntLabel.Parent = fameHuntFrame
     
-    return huntFrame
+    return fameHuntFrame
 end
 
--- Function to create a BillboardGui at the ghost's last known position
-local function createGhostGoneBillboard(position)
-    -- Create a part to anchor the BillboardGui
-    local anchorPart = Instance.new("Part")
-    anchorPart.Anchored = true
-    anchorPart.CanCollide = false
-    anchorPart.Transparency = 1 -- Make the part invisible
-    anchorPart.Position = position
-    anchorPart.Parent = workspace
+-- Function to create a BillboardGui on a part
+local function addBillboard(part, text)
+    -- Check if the BillboardGui already exists to avoid duplication
+    if part:FindFirstChild("GhostBillboard") then
+        return
+    end
 
-    -- Create the BillboardGui
+    -- Create BillboardGui
     local billboard = Instance.new("BillboardGui")
-    billboard.Adornee = anchorPart
+    billboard.Name = "GhostBillboard"
+    billboard.Adornee = part
     billboard.Size = UDim2.new(0, 100, 0, 50)
     billboard.StudsOffset = Vector3.new(0, 3, 0)
     billboard.AlwaysOnTop = true
-    billboard.Parent = anchorPart
+    billboard.Parent = part
 
+    -- Create TextLabel inside BillboardGui
     local textLabel = Instance.new("TextLabel")
     textLabel.Parent = billboard
     textLabel.BackgroundTransparency = 1
     textLabel.Size = UDim2.new(1, 0, 1, 0)
     textLabel.Font = Enum.Font.SourceSansBold
     textLabel.TextSize = 14
-    textLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
+    textLabel.TextColor3 = textColor
     textLabel.TextStrokeTransparency = 0
     textLabel.TextYAlignment = Enum.TextYAlignment.Center
-    textLabel.Text = "Ghost Gone"
+    textLabel.Text = text
     textLabel.ZIndex = 10
-
-    -- Optionally, remove the Billboard after some time
-    delay(10, function()
-        anchorPart:Destroy() -- Remove the part and billboard after 10 seconds
-    end)
 end
 
--- Function to monitor ghost hunting and events
-local function monitorGhostHunting()
-    local huntFrame = createHuntDisplay()
-    
-    local function updateHuntDisplay(isHunting)
-        if isHunting then
-            huntFrame.BackgroundColor3 = Color3.fromRGB(255, 0, 0)  -- Red color for hunting
-        else
-            huntFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)  -- Black color for ghost event
-        end
-        huntFrame.Visible = isHunting
-    end
-    
-    local ghostStartTime = nil
-    local lastGhostPosition = nil
-    
-    game:GetService("RunService").RenderStepped:Connect(function()
-        local Ghost = workspace:FindFirstChild("Ghost")
-        local isHunting = false
+-- Function to continuously check for the Ghost's presence
+local function trackGhost()
+    local fameHuntFrame = createFameHuntingDisplay() -- Create and reference fameHuntFrame here
+
+    while true do
+        local ghost = workspace:FindFirstChild("Ghost")
         
-        if Ghost then
-            lastGhostPosition = Ghost.Position -- Track the Ghost's position directly
-            
-            if not ghostStartTime then
-                ghostStartTime = tick()  -- Start the timer when the ghost appears
+        if ghost then
+            if not isTracking then
+                print("Ghost detected. Starting ESP.")
+                isTracking = true
+                addBillboard(ghost, "Ghost")
+                fameHuntFrame.Visible = true  -- Show the fameHuntFrame when the ghost is detected
             end
-            
-            local elapsedTime = tick() - ghostStartTime
-            if elapsedTime > 8 then
-                isHunting = true  -- Consider hunting if ghost is visible for more than 8 seconds
-            else
-                isHunting = false  -- Consider it a ghost event otherwise
-            end
-            
-            updateHuntDisplay(isHunting)
         else
-            if lastGhostPosition then
-                -- Ghost disappeared, create a "Ghost Gone" billboard at the last known position
-                createGhostGoneBillboard(lastGhostPosition)
+            if isTracking then
+                print("Ghost disappeared. Stopping ESP.")
+                isTracking = false
+                -- Remove existing BillboardGui if the ghost disappears
+                if workspace:FindFirstChild("GhostBillboard") then
+                    workspace:FindFirstChild("GhostBillboard"):Destroy()
+                end
+                fameHuntFrame.Visible = false  -- Hide the fameHuntFrame when the ghost disappears
             end
-            
-            ghostStartTime = nil  -- Reset timer if the ghost disappears
-            huntFrame.Visible = false
         end
-    end)
+
+        wait(1) -- Check every second
+    end
 end
 
--- Start monitoring ghost hunting and events
-monitorGhostHunting()
+-- Start the ghost tracking function
+spawn(trackGhost)
 
-print("Ghost Hunting and Event Monitor Script with Position Clue is running")
-
+print("Ghost ESP with dynamic detection and fameHuntingFrame script is running")
 --[[
-    END GHOST HUNTING WARNING SCRIPT
+    END GHOST ESP SCRIPT WITH DYNAMIC DETECTION AND FAME HUNTING FRAME
 ]]
