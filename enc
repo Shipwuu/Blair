@@ -1,0 +1,105 @@
+--[[
+    GHOST ESP SCRIPT WITH DYNAMIC DETECTION, STATUS DISPLAY, AND GHOST BILLBOARD
+]]
+
+local textColor = Color3.fromRGB(255, 255, 255) -- White color for the text
+local isTracking = false -- Flag to control the tracking loop
+
+-- Function to create or update GUI for ghost status display
+local function createGhostStatusDisplay()
+    local screenGui = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+    
+    local statusFrame = Instance.new("Frame")
+    statusFrame.Name = "GhostStatusFrame"
+    statusFrame.Size = UDim2.new(0, 200, 0, 50)  -- Width 200 pixels, height 50 pixels
+    statusFrame.Position = UDim2.new(0, 10, 1, -60)  -- Positioned at the bottom left corner with some padding
+    statusFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)  -- Black background
+    statusFrame.BackgroundTransparency = 0.5  -- Semi-transparent
+    statusFrame.BorderSizePixel = 0  -- Removed border
+    statusFrame.Parent = screenGui
+
+    local statusLabel = Instance.new("TextLabel")
+    statusLabel.Size = UDim2.new(1, 0, 1, 0)
+    statusLabel.BackgroundTransparency = 1
+    statusLabel.Font = Enum.Font.SourceSansBold
+    statusLabel.TextSize = 24
+    statusLabel.TextColor3 = textColor  -- White color for text
+    statusLabel.Text = "Ghost: None"  -- Initial text
+    statusLabel.TextStrokeTransparency = 0.5
+    statusLabel.TextXAlignment = Enum.TextXAlignment.Left
+    statusLabel.TextYAlignment = Enum.TextYAlignment.Center
+    statusLabel.Parent = statusFrame
+    
+    return statusLabel
+end
+
+-- Function to create a BillboardGui on a part
+local function addBillboard(part, text)
+    -- Check if the BillboardGui already exists to avoid duplication
+    if part:FindFirstChild("GhostBillboard") then
+        return
+    end
+
+    -- Create BillboardGui
+    local billboard = Instance.new("BillboardGui")
+    billboard.Name = "GhostBillboard"
+    billboard.Adornee = part
+    billboard.Size = UDim2.new(0, 100, 0, 50)
+    billboard.StudsOffset = Vector3.new(0, 3, 0)
+    billboard.AlwaysOnTop = true
+    billboard.Parent = part
+
+    -- Create TextLabel inside BillboardGui
+    local textLabel = Instance.new("TextLabel")
+    textLabel.Parent = billboard
+    textLabel.BackgroundTransparency = 1
+    textLabel.Size = UDim2.new(1, 0, 1, 0)
+    textLabel.Font = Enum.Font.SourceSansBold
+    textLabel.TextSize = 18  -- Increase the text size
+    textLabel.TextColor3 = textColor
+    textLabel.TextStrokeTransparency = 0
+    textLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0) -- Add a stroke color for more emphasis
+    textLabel.TextYAlignment = Enum.TextYAlignment.Center
+    textLabel.Text = text
+    textLabel.TextScaled = true -- Ensures the text is bold and noticeable
+    textLabel.ZIndex = 10
+end
+
+-- Function to continuously check for the Ghost's presence
+local function trackGhost()
+    local statusLabel = createGhostStatusDisplay() -- Create and reference statusLabel here
+
+    while true do
+        local ghost = workspace:FindFirstChild("Ghost")
+        
+        if ghost then
+            if not isTracking then
+                print("Ghost detected. Starting ESP.")
+                isTracking = true
+                addBillboard(ghost, "Ghost")
+                statusLabel.Text = "Ghost: Hunting"  -- Update text when ghost is detected
+            end
+        else
+            if isTracking then
+                print("Ghost disappeared. Stopping ESP.")
+                isTracking = false
+                statusLabel.Text = "Ghost: None"  -- Update text when ghost is not detected
+                
+                -- Remove existing BillboardGui if the ghost disappears
+                if ghost:FindFirstChild("GhostBillboard") then
+                    ghost:FindFirstChild("GhostBillboard"):Destroy()
+                end
+            end
+        end
+
+        wait(1) -- Check every second
+    end
+end
+
+-- Start the ghost tracking function
+spawn(trackGhost)
+
+print("Ghost ESP with dynamic detection, status display, and GhostBillboard is running")
+--[[
+    END GHOST ESP SCRIPT WITH DYNAMIC DETECTION, STATUS DISPLAY, AND GHOST BILLBOARD
+]]
