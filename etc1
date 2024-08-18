@@ -1,11 +1,11 @@
 --[[
-    GHOST ESP SCRIPT WITH PERMANENT NEWS SCREEN GUI AND SPAWN BILLBOARD
+    GHOST ESP SCRIPT WITH PERMANENT SPAWN BILLBOARD AND TRACKING BILLBOARDS
 ]]
 
 local textColorHunting = Color3.fromRGB(255, 0, 0) -- Red color for "Hunting" text
 local textColorNone = Color3.fromRGB(255, 255, 255) -- White color for "None" text with slight transparency
-local isTracking = false -- Flag to control the tracking loop
 local spawnCount = 1 -- Counter for ghost spawn billboards
+local ghostSpawnBillboard = nil -- Reference to the initial spawn billboard
 
 -- Function to create the permanent news screen GUI
 local function createNewsScreen()
@@ -43,10 +43,10 @@ local function createNewsScreen()
 end
 
 -- Function to create a BillboardGui on a part with spawn count text
-local function addSpawnBillboard(part, spawnNumber)
+local function addBillboard(part, text)
     -- Create BillboardGui
     local billboard = Instance.new("BillboardGui")
-    billboard.Name = "GhostBillboard" .. spawnNumber
+    billboard.Name = "GhostBillboard"
     billboard.Adornee = part
     billboard.Size = UDim2.new(0, 150, 0, 50)
     billboard.StudsOffset = Vector3.new(0, 5, 0)
@@ -63,11 +63,11 @@ local function addSpawnBillboard(part, spawnNumber)
     textLabel.TextColor3 = Color3.fromRGB(255, 255, 0) -- Yellow color for spawn indicator
     textLabel.TextStrokeTransparency = 0
     textLabel.TextYAlignment = Enum.TextYAlignment.Center
-    textLabel.Text = "Ghost Spawn " .. spawnNumber
+    textLabel.Text = text
     textLabel.ZIndex = 10
 end
 
--- Function to continuously check for the Ghost's presence
+-- Function to continuously check for the Ghost's presence and handle billboards
 local function trackGhost()
     local ghostLabel = createNewsScreen() -- Create and reference ghostLabel here
 
@@ -75,18 +75,39 @@ local function trackGhost()
         local ghost = workspace:FindFirstChild("Ghost")
         
         if ghost then
+            -- Create or update the BillboardGui for tracking the ghost
+            local existingTrackingBillboard = ghost:FindFirstChild("GhostTrackingBillboard")
+            if not existingTrackingBillboard then
+                addBillboard(ghost, "Ghost Tracking")
+                ghost.Name = "GhostTracking"
+            end
+            
+            -- Create a permanent billboard at the ghost's initial spawn location if it does not exist
+            if not ghostSpawnBillboard then
+                ghostSpawnBillboard = Instance.new("BillboardGui")
+                ghostSpawnBillboard.Name = "GhostSpawnBillboard"
+                ghostSpawnBillboard.Adornee = ghost
+                ghostSpawnBillboard.Size = UDim2.new(0, 150, 0, 50)
+                ghostSpawnBillboard.StudsOffset = Vector3.new(0, 10, 0)
+                ghostSpawnBillboard.AlwaysOnTop = true
+                ghostSpawnBillboard.Parent = ghost
+                
+                local spawnLabel = Instance.new("TextLabel")
+                spawnLabel.Parent = ghostSpawnBillboard
+                spawnLabel.BackgroundTransparency = 1
+                spawnLabel.Size = UDim2.new(1, 0, 1, 0)
+                spawnLabel.Font = Enum.Font.SourceSansBold
+                spawnLabel.TextSize = 24
+                spawnLabel.TextColor3 = Color3.fromRGB(255, 0, 0) -- Red color for spawn indicator
+                spawnLabel.TextStrokeTransparency = 0
+                spawnLabel.TextYAlignment = Enum.TextYAlignment.Center
+                spawnLabel.Text = "Ghost Spawn " .. spawnCount
+                spawnLabel.ZIndex = 10
+            end
+            
             if not isTracking then
                 print("Ghost detected. Starting ESP.")
                 isTracking = true
-                
-                -- Add or update the BillboardGui on the ghost
-                local existingBillboard = ghost:FindFirstChild("GhostBillboard" .. spawnCount)
-                if not existingBillboard then
-                    -- Increment spawn count and add new BillboardGui
-                    spawnCount = spawnCount + 1
-                    addSpawnBillboard(ghost, spawnCount - 1) -- Spawn number is the previous count
-                end
-                
                 ghostLabel.Text = "Ghost: Hunting"
                 ghostLabel.TextColor3 = textColorHunting  -- Red color when ghost is detected
                 ghostLabel.TextTransparency = 0  -- No transparency for "Hunting" text
@@ -95,7 +116,7 @@ local function trackGhost()
             if isTracking then
                 print("Ghost disappeared. Stopping ESP.")
                 isTracking = false
-                -- Do not destroy billboards; keep them as is
+                -- Preserve the existing spawn billboard; do not destroy it
             end
             ghostLabel.Text = "Ghost: None"
             ghostLabel.TextColor3 = textColorNone  -- White color when no ghost is detected
@@ -109,7 +130,7 @@ end
 -- Start the ghost tracking function
 spawn(trackGhost)
 
-print("Ghost ESP with permanent news screen GUI and spawn billboards script is running")
+print("Ghost ESP with permanent spawn billboard and tracking billboards script is running")
 --[[
-    END GHOST ESP SCRIPT WITH PERMANENT NEWS SCREEN GUI AND SPAWN BILLBOARDS
+    END GHOST ESP SCRIPT WITH PERMANENT SPAWN BILLBOARD AND TRACKING BILLBOARDS
 ]]
