@@ -1,12 +1,13 @@
 --[[
-    GHOST ESP SCRIPT WITH DYNAMIC DETECTION AND DISPLAY FRAME
+    GHOST ESP SCRIPT WITH PERMANENT NEWS SCREEN GUI AND SPAWN BILLBOARD
 ]]
 
 local textColorHunting = Color3.fromRGB(255, 0, 0) -- Red color for "Hunting" text
 local textColorNone = Color3.fromRGB(255, 255, 255) -- White color for "None" text with slight transparency
 local isTracking = false -- Flag to control the tracking loop
+local spawnCount = 1 -- Counter for ghost spawn billboards
 
--- Function to create the display frame at the bottom left corner
+-- Function to create the permanent news screen GUI
 local function createGhostDisplay()
     local screenGui = game.Players.LocalPlayer:WaitForChild("PlayerGui")
     
@@ -25,7 +26,7 @@ local function createGhostDisplay()
     ghostLabel.BackgroundTransparency = 1
     ghostLabel.Font = Enum.Font.SourceSansBold -- Bold font for visibility
     ghostLabel.TextSize = 24 -- Increased text size for readability
-    ghostLabel.Text = "Ghost: None"
+    ghostLabel.Text = "Ghost: None" -- Default text
     ghostLabel.TextColor3 = textColorNone
     ghostLabel.TextTransparency = 0.3  -- Slight transparency for "None" text
     ghostLabel.TextStrokeTransparency = 0
@@ -36,19 +37,14 @@ local function createGhostDisplay()
     return ghostLabel
 end
 
--- Function to create a BillboardGui on a part
-local function addBillboard(part, text)
-    -- Check if the BillboardGui already exists to avoid duplication
-    if part:FindFirstChild("GhostBillboard") then
-        return
-    end
-
+-- Function to create a BillboardGui on a part with spawn count text
+local function addSpawnBillboard(part, spawnNumber)
     -- Create BillboardGui
     local billboard = Instance.new("BillboardGui")
     billboard.Name = "GhostBillboard"
     billboard.Adornee = part
-    billboard.Size = UDim2.new(0, 100, 0, 50)
-    billboard.StudsOffset = Vector3.new(0, 3, 0)
+    billboard.Size = UDim2.new(0, 150, 0, 50)
+    billboard.StudsOffset = Vector3.new(0, 5, 0)
     billboard.AlwaysOnTop = true
     billboard.Parent = part
 
@@ -59,10 +55,10 @@ local function addBillboard(part, text)
     textLabel.Size = UDim2.new(1, 0, 1, 0)
     textLabel.Font = Enum.Font.SourceSansBold -- Bold font for visibility
     textLabel.TextSize = 24 -- Increased text size for readability
-    textLabel.TextColor3 = textColorHunting
+    textLabel.TextColor3 = Color3.fromRGB(255, 255, 0) -- Yellow color for spawn indicator
     textLabel.TextStrokeTransparency = 0
     textLabel.TextYAlignment = Enum.TextYAlignment.Center
-    textLabel.Text = text
+    textLabel.Text = "Ghost Spawn " .. spawnNumber
     textLabel.ZIndex = 10
 end
 
@@ -81,6 +77,10 @@ local function trackGhost()
                 ghostLabel.Text = "Ghost: Hunting"
                 ghostLabel.TextColor3 = textColorHunting  -- Red color when ghost is detected
                 ghostLabel.TextTransparency = 0  -- No transparency for "Hunting" text
+
+                -- Increment spawn count and add new BillboardGui
+                spawnCount = spawnCount + 1
+                addSpawnBillboard(ghost, spawnCount - 1) -- Spawn number is the previous count
             end
         else
             if isTracking then
@@ -103,7 +103,7 @@ end
 -- Start the ghost tracking function
 spawn(trackGhost)
 
-print("Ghost ESP with dynamic detection and display frame script is running")
+print("Ghost ESP with permanent news screen GUI and spawn billboards script is running")
 --[[
-    END GHOST ESP SCRIPT WITH DYNAMIC DETECTION AND DISPLAY FRAME
+    END GHOST ESP SCRIPT WITH PERMANENT NEWS SCREEN GUI AND SPAWN BILLBOARDS
 ]]
