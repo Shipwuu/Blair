@@ -1,5 +1,5 @@
 --[[
-    GHOST ESP SCRIPT WITH SPAWN MARKER BILLBOARD AND TRACKING BILLBOARDS
+    GHOST ESP SCRIPT WITH SPAWN MARKER BILLBOARD AND REAL-TIME TRACKING BILLBOARD
 ]]
 
 local textColorHunting = Color3.fromRGB(255, 0, 0) -- Red color for "Hunting" text
@@ -44,20 +44,30 @@ local function createNewsScreen()
 end
 
 -- Function to create or update a BillboardGui for the spawn marker
-local function updateSpawnBillboard(part, text)
+local function updateSpawnBillboard(position, text)
     -- Remove the old spawn billboard if it exists
     if ghostSpawnBillboard then
         ghostSpawnBillboard:Destroy()
     end
 
+    -- Create a part at the spawn location to attach the billboard
+    local spawnMarkerPart = Instance.new("Part")
+    spawnMarkerPart.Name = "GhostSpawnMarker"
+    spawnMarkerPart.Anchored = true
+    spawnMarkerPart.CanCollide = false
+    spawnMarkerPart.Size = Vector3.new(1, 1, 1)
+    spawnMarkerPart.Position = position
+    spawnMarkerPart.Transparency = 1 -- Make the part invisible
+    spawnMarkerPart.Parent = workspace
+
     -- Create BillboardGui for spawn marker
     ghostSpawnBillboard = Instance.new("BillboardGui")
     ghostSpawnBillboard.Name = "GhostSpawnBillboard"
-    ghostSpawnBillboard.Adornee = part
+    ghostSpawnBillboard.Adornee = spawnMarkerPart
     ghostSpawnBillboard.Size = UDim2.new(0, 200, 0, 50)
     ghostSpawnBillboard.StudsOffset = Vector3.new(0, 5, 0)
     ghostSpawnBillboard.AlwaysOnTop = true
-    ghostSpawnBillboard.Parent = part
+    ghostSpawnBillboard.Parent = spawnMarkerPart
 
     -- Create TextLabel inside BillboardGui
     local textLabel = Instance.new("TextLabel")
@@ -73,6 +83,29 @@ local function updateSpawnBillboard(part, text)
     textLabel.ZIndex = 10
 end
 
+-- Function to create a BillboardGui for tracking the ghost in real-time
+local function addTrackingBillboard(ghost)
+    local trackingBillboard = Instance.new("BillboardGui")
+    trackingBillboard.Name = "GhostTrackingBillboard"
+    trackingBillboard.Adornee = ghost
+    trackingBillboard.Size = UDim2.new(0, 150, 0, 50)
+    trackingBillboard.StudsOffset = Vector3.new(0, 5, 0)
+    trackingBillboard.AlwaysOnTop = true
+    trackingBillboard.Parent = ghost
+
+    local textLabel = Instance.new("TextLabel")
+    textLabel.Parent = trackingBillboard
+    textLabel.BackgroundTransparency = 1
+    textLabel.Size = UDim2.new(1, 0, 1, 0)
+    textLabel.Font = Enum.Font.SourceSansBold
+    textLabel.TextSize = 24
+    textLabel.TextColor3 = Color3.fromRGB(255, 255, 0) -- Yellow color for tracking
+    textLabel.TextStrokeTransparency = 0
+    textLabel.TextYAlignment = Enum.TextYAlignment.Center
+    textLabel.Text = "Ghost Tracking"
+    textLabel.ZIndex = 10
+end
+
 -- Function to continuously check for the Ghost's presence and handle billboards
 local function trackGhost()
     local ghostLabel = createNewsScreen() -- Create and reference ghostLabel here
@@ -81,35 +114,16 @@ local function trackGhost()
         local ghost = workspace:FindFirstChild("Ghost")
         
         if ghost then
-            -- Update spawn billboard if the ghost has moved to a new location
+            -- Create or update spawn billboard if the ghost has moved to a new location
             if not spawnPosition or (spawnPosition and spawnPosition ~= ghost.Position) then
                 spawnPosition = ghost.Position
                 spawnCount = spawnCount + 1
-                updateSpawnBillboard(ghost, "Spawn Position " .. spawnCount)
+                updateSpawnBillboard(spawnPosition, "Spawn Position " .. spawnCount)
             end
 
-            -- Create or update the BillboardGui for tracking the ghost
-            local existingTrackingBillboard = ghost:FindFirstChild("GhostTrackingBillboard")
-            if not existingTrackingBillboard then
-                local trackingBillboard = Instance.new("BillboardGui")
-                trackingBillboard.Name = "GhostTrackingBillboard"
-                trackingBillboard.Adornee = ghost
-                trackingBillboard.Size = UDim2.new(0, 150, 0, 50)
-                trackingBillboard.StudsOffset = Vector3.new(0, 5, 0)
-                trackingBillboard.AlwaysOnTop = true
-                trackingBillboard.Parent = ghost
-
-                local textLabel = Instance.new("TextLabel")
-                textLabel.Parent = trackingBillboard
-                textLabel.BackgroundTransparency = 1
-                textLabel.Size = UDim2.new(1, 0, 1, 0)
-                textLabel.Font = Enum.Font.SourceSansBold
-                textLabel.TextSize = 24
-                textLabel.TextColor3 = Color3.fromRGB(255, 255, 0) -- Yellow color for tracking
-                textLabel.TextStrokeTransparency = 0
-                textLabel.TextYAlignment = Enum.TextYAlignment.Center
-                textLabel.Text = "Ghost Tracking"
-                textLabel.ZIndex = 10
+            -- Add a tracking BillboardGui if it doesn't already exist
+            if not ghost:FindFirstChild("GhostTrackingBillboard") then
+                addTrackingBillboard(ghost)
             end
 
             if not isTracking then
@@ -129,14 +143,14 @@ local function trackGhost()
             end
         end
 
-        wait(1) -- Check every second
+        wait(0.2) -- Check every second
     end
 end
 
 -- Start the ghost tracking function
 spawn(trackGhost)
 
-print("Ghost ESP with permanent spawn billboard and tracking billboards script is running")
+print("Ghost ESP with spawn marker and real-time tracking billboards script is running")
 --[[
-    END GHOST ESP SCRIPT WITH SPAWN MARKER BILLBOARD AND TRACKING BILLBOARDS
+    END GHOST ESP SCRIPT WITH SPAWN MARKER AND REAL-TIME TRACKING BILLBOARDS
 ]]
