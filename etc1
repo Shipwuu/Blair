@@ -8,9 +8,14 @@ local isTracking = false -- Flag to control the tracking loop
 local spawnCount = 1 -- Counter for ghost spawn billboards
 
 -- Function to create the permanent news screen GUI
-local function createGhostDisplay()
-    local screenGui = game.Players.LocalPlayer:WaitForChild("PlayerGui")
-    
+local function createNewsScreen()
+    local playerGui = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+
+    local newsScreen = Instance.new("ScreenGui")
+    newsScreen.Name = "GhostNewsScreen"
+    newsScreen.Parent = playerGui
+    newsScreen.ResetOnSpawn = false
+
     local displayFrame = Instance.new("Frame")
     displayFrame.Name = "GhostDisplayFrame"
     displayFrame.Size = UDim2.new(0, 200, 0, 50)  -- Width of 200 pixels, height of 50 pixels
@@ -18,7 +23,7 @@ local function createGhostDisplay()
     displayFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)  -- Black color for background
     displayFrame.BackgroundTransparency = 0.5  -- Semi-transparent background
     displayFrame.BorderSizePixel = 0  -- No border
-    displayFrame.Parent = screenGui
+    displayFrame.Parent = newsScreen
 
     local ghostLabel = Instance.new("TextLabel")
     ghostLabel.Name = "GhostLabel"
@@ -33,7 +38,7 @@ local function createGhostDisplay()
     ghostLabel.TextXAlignment = Enum.TextXAlignment.Left
     ghostLabel.TextYAlignment = Enum.TextYAlignment.Center
     ghostLabel.Parent = displayFrame
-    
+
     return ghostLabel
 end
 
@@ -41,7 +46,7 @@ end
 local function addSpawnBillboard(part, spawnNumber)
     -- Create BillboardGui
     local billboard = Instance.new("BillboardGui")
-    billboard.Name = "GhostBillboard"
+    billboard.Name = "GhostBillboard" .. spawnNumber
     billboard.Adornee = part
     billboard.Size = UDim2.new(0, 150, 0, 50)
     billboard.StudsOffset = Vector3.new(0, 5, 0)
@@ -64,7 +69,7 @@ end
 
 -- Function to continuously check for the Ghost's presence
 local function trackGhost()
-    local ghostLabel = createGhostDisplay() -- Create and reference ghostLabel here
+    local ghostLabel = createNewsScreen() -- Create and reference ghostLabel here
 
     while true do
         local ghost = workspace:FindFirstChild("Ghost")
@@ -73,23 +78,24 @@ local function trackGhost()
             if not isTracking then
                 print("Ghost detected. Starting ESP.")
                 isTracking = true
-                addBillboard(ghost, "Ghost")
+                
+                -- Add or update the BillboardGui on the ghost
+                local existingBillboard = ghost:FindFirstChild("GhostBillboard" .. spawnCount)
+                if not existingBillboard then
+                    -- Increment spawn count and add new BillboardGui
+                    spawnCount = spawnCount + 1
+                    addSpawnBillboard(ghost, spawnCount - 1) -- Spawn number is the previous count
+                end
+                
                 ghostLabel.Text = "Ghost: Hunting"
                 ghostLabel.TextColor3 = textColorHunting  -- Red color when ghost is detected
                 ghostLabel.TextTransparency = 0  -- No transparency for "Hunting" text
-
-                -- Increment spawn count and add new BillboardGui
-                spawnCount = spawnCount + 1
-                addSpawnBillboard(ghost, spawnCount - 1) -- Spawn number is the previous count
             end
         else
             if isTracking then
                 print("Ghost disappeared. Stopping ESP.")
                 isTracking = false
-                -- Remove existing BillboardGui if the ghost disappears
-                if workspace:FindFirstChild("GhostBillboard") then
-                    workspace:FindFirstChild("GhostBillboard"):Destroy()
-                end
+                -- Do not destroy billboards; keep them as is
             end
             ghostLabel.Text = "Ghost: None"
             ghostLabel.TextColor3 = textColorNone  -- White color when no ghost is detected
