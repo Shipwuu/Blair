@@ -563,7 +563,7 @@ end
 -- Start the ghost tracking function
 spawn(trackGhost)
 
-print("Ghost ESP with dynamic detection script is running")
+print("Script I ON💚")
 --[[
     END GHOST ESP SCRIPT WITH DYNAMIC DETECTION
 ]]
