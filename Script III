@@ -1,0 +1,43 @@
+-- Initialize a counter to keep track of the number of ghost spawns
+local ghostSpawnCount = 0
+
+-- Function to create a billboard GUI
+local function createBillboard(ghost)
+    ghostSpawnCount = ghostSpawnCount + 1
+
+    -- Create a BillboardGui
+    local billboard = Instance.new("BillboardGui")
+    billboard.Name = "GhostBillboard"
+    billboard.Adornee = ghost
+    billboard.Size = UDim2.new(3, 0, 1, 0)
+    billboard.StudsOffset = Vector3.new(0, 2, 0)
+    billboard.AlwaysOnTop = true
+
+    -- Create a TextLabel inside the BillboardGui
+    local textLabel = Instance.new("TextLabel")
+    textLabel.Parent = billboard
+    textLabel.Size = UDim2.new(1, 0, 1, 0)
+    textLabel.Text = "Ghost Spawned: " .. ghostSpawnCount
+    textLabel.TextColor3 = Color3.new(1, 0, 0) -- Red color
+    textLabel.BackgroundTransparency = 1
+    textLabel.TextScaled = true
+
+    -- Parent the BillboardGui to the ghost object
+    billboard.Parent = ghost
+end
+
+-- Function to check if "workspace.Ghost" exists
+local function checkForGhost()
+    while true do
+        wait(1) -- Check every second
+        local ghost = workspace:FindFirstChild("Ghost")
+        if ghost and not ghost:FindFirstChild("GhostBillboard") then
+            createBillboard(ghost)
+        end
+    end
+end
+
+-- Execute the check loop
+spawn(checkForGhost)
+
+print("Script III ON💚")
