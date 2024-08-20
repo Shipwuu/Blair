@@ -109,7 +109,7 @@ end
 -- Start the ghost tracking function
 spawn(trackGhost)
 
-print("Ghost ESP with permanent news screen GUI and spawn billboards script is running")
+print("Script II ON💚")
 --[[
     END GHOST ESP SCRIPT WITH PERMANENT NEWS SCREEN GUI AND SPAWN BILLBOARDS
 ]]
