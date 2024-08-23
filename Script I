@@ -60,6 +60,7 @@ toggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 toggleButton.Font = Enum.Font.SourceSansBold
 toggleButton.TextSize = 18
 toggleButton.Text = "Toggle GUI"
+toggleButton.Visible = false
 
 toggleButton.MouseButton1Click:Connect(function()
     mainFrame.Visible = not mainFrame.Visible
@@ -492,7 +493,7 @@ while true do
     wait(0.5)
 end
 
-print("Speed ON")
+print("Speed ON THAT TIME💚")
 --[[
 	END SPEED SCRIPT
 ]]
