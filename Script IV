@@ -34,3 +34,5 @@ end
 
 -- Start the time update loop
 updateTime()
+
+print("Script IV ON💚")
