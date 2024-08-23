@@ -32,8 +32,8 @@ cornerMain.Parent = mainFrame
 -- Create Timer Frame
 local timerFrame = Instance.new("Frame")
 timerFrame.Name = "TimerFrame"
-timerFrame.Size = UDim2.new(0, 220, 0, 50) -- Smaller size to fit within the main frame
-timerFrame.Position = UDim2.new(0.5, -110, 0.5, -25) -- Centered in the main frame both horizontally and vertically
+timerFrame.Size = UDim2.new(0, 200, 0, 50) -- Smaller size to fit within the main frame
+timerFrame.Position = UDim2.new(0.5, -100, 0.5, -25) -- Centered in the main frame both horizontally and vertically
 timerFrame.AnchorPoint = Vector2.new(0.5, 0.5) -- Anchor point set to the center
 timerFrame.BackgroundTransparency = 1 -- Fully transparent background
 timerFrame.BorderSizePixel = 1  -- Set to 1 for a visible border
@@ -78,4 +78,4 @@ end
 -- Start the time update loop without blocking the script
 spawn(updateTime)
 
-print("check 1")
+print("check 2")
