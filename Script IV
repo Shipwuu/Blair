@@ -32,8 +32,7 @@ local function updateTime()
     end
 end
 
--- Start the time update loop
-updateTime()
+-- Start the time update loop without blocking the script
+spawn(updateTime)
 
 print("Script IV ON💚")
-end
