@@ -1,5 +1,3 @@
--- Mid------------------------------------------------------------
-
 -- Create a new ScreenGui for the zone display
 local zoneScreenGui = Instance.new("ScreenGui")
 zoneScreenGui.Name = "ZoneDisplayGui"
@@ -60,6 +58,7 @@ local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
 
 local currentZone = nil
 local monitoring = false
+local freezingDetected = false -- Flag to track freezing evidence detection
 
 -- Function to update the zone display
 local function updateZoneDisplay(zoneName)
@@ -75,15 +74,13 @@ local function updateTemperatureDisplay(temperature)
     if temperature then
         tempLabel.Text = "Temperature: " .. tostring(temperature) .. "°C"
         -- Check if temperature is below freezing and notify
-        if temperature < 0.10 then
+        if temperature < 0.10 and not freezingDetected then
             notifyLabel.Text = "Freezing Evidence Detected!"
             notifyLabel.Visible = true
-        else
-            notifyLabel.Visible = false
+            freezingDetected = true -- Set the flag to true to make notification permanent
         end
     else
         tempLabel.Text = "Temperature: N/A"
-        notifyLabel.Visible = false
     end
 end
 
