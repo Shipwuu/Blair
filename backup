@@ -1,103 +1,79 @@
---[[
-    GHOST ESP SCRIPT WITH DYNAMIC DETECTION AND HUNT FRAME
-]]
+-- Services
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
 
-local textColor = Color3.fromRGB(255, 0, 0) -- Red color for the "Ghost" text
-local isTracking = false -- Flag to control the tracking loop
-
--- Function to create or update GUI for hunt display
-local function createHuntDisplay()
-    local screenGui = game.Players.LocalPlayer:WaitForChild("PlayerGui")
-    
-    local huntFrame = Instance.new("Frame")
-    huntFrame.Name = "HuntFrame"
-    huntFrame.Size = UDim2.new(1, 0, 0, 30)  -- Full width, height of 30 pixels
-    huntFrame.Position = UDim2.new(0, 0, 0, 0)  -- Positioned at the top of the screen
-    huntFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    huntFrame.BackgroundTransparency = 0.7  -- More transparency
-    huntFrame.BorderSizePixel = 0  -- Removed border
-    huntFrame.Visible = false
-    huntFrame.Parent = screenGui
-
-    local huntLabel = Instance.new("TextLabel")
-    huntLabel.Size = UDim2.new(1, 0, 1, 0)
-    huntLabel.BackgroundTransparency = 1
-    huntLabel.Font = Enum.Font.SourceSans
-    huntLabel.TextSize = 18
-    huntLabel.TextColor3 = Color3.fromRGB(255, 255, 255)  -- White color for text
-    huntLabel.Text = "Hunting"
-    huntLabel.TextStrokeTransparency = 0.5
-    huntLabel.TextXAlignment = Enum.TextXAlignment.Center
-    huntLabel.TextYAlignment = Enum.TextYAlignment.Center
-    huntLabel.Parent = huntFrame
-    
-    return huntFrame
+-- Check for existing GUI and destroy if found (to prevent duplication)
+if LocalPlayer:WaitForChild("PlayerGui"):FindFirstChild("MainGui") then
+    LocalPlayer.PlayerGui.MainGui:Destroy()
 end
 
--- Function to create a BillboardGui on a part
-local function addBillboard(part, text)
-    -- Check if the BillboardGui already exists to avoid duplication
-    if part:FindFirstChild("GhostBillboard") then
-        return
-    end
+-- Create a new ScreenGui
+local mainGui = Instance.new("ScreenGui")
+mainGui.Name = "MainGui"
+mainGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+mainGui.ResetOnSpawn = false
 
-    -- Create BillboardGui
-    local billboard = Instance.new("BillboardGui")
-    billboard.Name = "GhostBillboard"
-    billboard.Adornee = part
-    billboard.Size = UDim2.new(0, 100, 0, 50)
-    billboard.StudsOffset = Vector3.new(0, 3, 0)
-    billboard.AlwaysOnTop = true
-    billboard.Parent = part
+-- Create the main frame
+local mainFrame = Instance.new("Frame")
+mainFrame.Name = "MainFrame"
+mainFrame.Size = UDim2.new(0, 250, 0, 400)  -- Adjusted height to 400 pixels
+mainFrame.Position = UDim2.new(0, 10, 0.5, -200)  -- Center-left of the screen with adjusted vertical position
+mainFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)  -- Black background color
+mainFrame.BackgroundTransparency = 0.8  -- Almost transparent
+mainFrame.BorderSizePixel = 1  -- Set to 1 for a visible border
+mainFrame.BorderColor3 = Color3.fromRGB(255, 255, 255)  -- White color for border
+mainFrame.Parent = mainGui
 
-    -- Create TextLabel inside BillboardGui
-    local textLabel = Instance.new("TextLabel")
-    textLabel.Parent = billboard
-    textLabel.BackgroundTransparency = 1
-    textLabel.Size = UDim2.new(1, 0, 1, 0)
-    textLabel.Font = Enum.Font.SourceSansBold
-    textLabel.TextSize = 14
-    textLabel.TextColor3 = textColor
-    textLabel.TextStrokeTransparency = 0
-    textLabel.TextYAlignment = Enum.TextYAlignment.Center
-    textLabel.Text = text
-    textLabel.ZIndex = 10
-end
+-- Add UICorner to main frame
+local cornerMain = Instance.new("UICorner")
+cornerMain.CornerRadius = UDim.new(0, 10)  -- Adjust corner radius as needed
+cornerMain.Parent = mainFrame
 
--- Function to continuously check for the Ghost's presence
-local function trackGhost()
-    local huntFrame = createHuntDisplay() -- Create and reference huntFrame here
+-- Create Timer Frame
+local timerFrame = Instance.new("Frame")
+timerFrame.Name = "TimerFrame"
+timerFrame.Size = UDim2.new(0, 220, 0, 50) -- Smaller size to fit within the main frame
+timerFrame.Position = UDim2.new(0.5, -110, 0, -70) -- Position above the main frame, but within its width
+timerFrame.AnchorPoint = Vector2.new(0.5, 0) -- Anchor point set to the middle
+timerFrame.BackgroundTransparency = 1 -- Fully transparent background
+timerFrame.BorderSizePixel = 1  -- Set to 1 for a visible border
+timerFrame.BorderColor3 = Color3.fromRGB(255, 255, 255)  -- White color for border
+timerFrame.Parent = mainFrame
 
+-- Add UICorner to timer frame
+local cornerTimer = Instance.new("UICorner")
+cornerTimer.CornerRadius = UDim.new(0, 15)  -- More rounded corners for a slightly oval shape
+cornerTimer.Parent = timerFrame
+
+-- Timer Script Integration
+local timerLabel = Instance.new("TextLabel")
+timerLabel.Name = "TimerLabel"
+timerLabel.Parent = timerFrame
+timerLabel.Size = UDim2.new(1, -20, 1, -20) -- Make it smaller inside the frame to give it padding
+timerLabel.Position = UDim2.new(0.5, 0, 0.5, 0)
+timerLabel.AnchorPoint = Vector2.new(0.5, 0.5) -- Center in the frame
+timerLabel.BackgroundTransparency = 1 -- Fully transparent background
+timerLabel.TextColor3 = Color3.new(1, 1, 1) -- White text
+timerLabel.Font = Enum.Font.SourceSansBold
+timerLabel.TextScaled = true
+timerLabel.Text = "00:00" -- Initial text
+
+-- Define the path to the Timer TextLabel
+local timerTextPath = workspace:WaitForChild("Map"):WaitForChild("Van"):WaitForChild("Van")
+                        :WaitForChild("TimerModel"):WaitForChild("Monitor")
+                        :WaitForChild("SurfaceGui"):WaitForChild("Timer")
+
+-- Function to update the time on the screen
+local function updateTime()
     while true do
-        local ghost = workspace:FindFirstChild("Ghost")
-        
-        if ghost then
-            if not isTracking then
-                print("Ghost detected. Starting ESP.")
-                isTracking = true
-                addBillboard(ghost, "Ghost")
-                huntFrame.Visible = true  -- Show the huntFrame when the ghost is detected
-            end
+        if timerTextPath and timerTextPath:IsA("TextLabel") then
+            timerLabel.Text = timerTextPath.Text -- Update the ScreenGui label text with the timer's text
         else
-            if isTracking then
-                print("Ghost disappeared. Stopping ESP.")
-                isTracking = false
-                -- Remove existing BillboardGui if the ghost disappears
-                if workspace:FindFirstChild("GhostBillboard") then
-                    workspace:FindFirstChild("GhostBillboard"):Destroy()
-                end
-                huntFrame.Visible = false  -- Hide the huntFrame when the ghost disappears
-            end
+            warn("Timer TextLabel not found or is not a TextLabel instance")
         end
-
-        wait(1) -- Check every second
+        wait(1) -- Wait for 1 second before updating again
     end
 end
 
--- Start the ghost tracking function
-spawn(trackGhost)
-
-print("Ghost ESP with dynamic detection and huntFrame script is running")
---[[
-    END GHOST ESP SCRIPT WITH DYNAMIC DETECTION AND HUNT FRAME
-]]
+-- Start the time update loop without blocking the script
+spawn(updateTime)
