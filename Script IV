@@ -35,7 +35,7 @@ end
 -- Start the time update loop
 updateTime()
 
--- Mid
+-- Mid------------------------------------------------------------
 
 -- Create a new ScreenGui for the zone display
 local zoneScreenGui = Instance.new("ScreenGui")
@@ -179,5 +179,53 @@ for _, zone in pairs(zonesFolder:GetChildren()) do
         end)
     end
 end
+
+-- Mid----------------------------------------------------------
+
+-- Create a ScreenGui and TextButton
+local screenGui = Instance.new("ScreenGui")
+local teleportButton = Instance.new("TextButton")
+
+-- Set up the ScreenGui
+screenGui.Name = "TeleportGui"
+screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+
+-- Set up the Teleport Button
+teleportButton.Name = "TeleportButton"
+teleportButton.Parent = screenGui
+teleportButton.Text = "Teleport to Van Spawn"
+teleportButton.Size = UDim2.new(0, 150, 0, 40) -- Smaller button size (150x40 pixels)
+teleportButton.Position = UDim2.new(1, -160, 1, -60) -- Positioned at the bottom-right corner of the screen
+teleportButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0) -- Black color
+teleportButton.BackgroundTransparency = 0.8 -- Almost transparent
+teleportButton.TextColor3 = Color3.new(1, 1, 1) -- White text
+teleportButton.Font = Enum.Font.SourceSansBold
+teleportButton.TextScaled = true
+teleportButton.BorderSizePixel = 2 -- Adds a border
+teleportButton.BorderColor3 = Color3.fromRGB(255, 255, 255) -- White border
+
+-- Teleportation Function
+local function teleportPlayer()
+    local gotopartDelay = 0.1
+    local targetPart = workspace:FindFirstChild("Map"):FindFirstChild("Van"):FindFirstChild("SpawnLocation")
+    
+    if targetPart and targetPart:IsA("BasePart") then
+        local speaker = game.Players.LocalPlayer
+        if speaker.Character and speaker.Character:FindFirstChildOfClass('Humanoid') then
+            local humanoid = speaker.Character:FindFirstChildOfClass('Humanoid')
+            if humanoid.SeatPart then
+                humanoid.Sit = false
+                wait(0.1)
+            end
+            wait(gotopartDelay)
+            speaker.Character:WaitForChild("HumanoidRootPart").CFrame = targetPart.CFrame
+        end
+    else
+        warn("Target part not found or is not a BasePart")
+    end
+end
+
+-- Connect the function to the button's MouseButton1Click event
+teleportButton.MouseButton1Click:Connect(teleportPlayer)
 
 print("Script IV ON💚")
