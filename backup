@@ -17,24 +17,24 @@ mainGui.ResetOnSpawn = false
 local mainFrame = Instance.new("Frame")
 mainFrame.Name = "MainFrame"
 mainFrame.Size = UDim2.new(0, 250, 0, 400)  -- Height adjusted to 400 pixels
-mainFrame.Position = UDim2.new(0, 10, 0.5, -200)  -- Center-left of the screen with adjusted vertical position
-mainFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)  -- Black background color
-mainFrame.BackgroundTransparency = 0.8  -- Almost transparent
-mainFrame.BorderSizePixel = 1  -- Set to 1 for a visible border
-mainFrame.BorderColor3 = Color3.fromRGB(255, 255, 255)  -- White color for border
+mainFrame.Position = UDim2.new(0.5, -125, 0.5, -200)  -- Center of the screen
+mainFrame.AnchorPoint = Vector2.new(0.5, 0.5)  -- Center the frame in the middle of the screen
+mainFrame.BackgroundColor3 = Color3.fromRGB(0, 80, 100)  -- Teal color for background
+mainFrame.BackgroundTransparency = 0.2  -- Slight transparency
+mainFrame.BorderSizePixel = 0  -- No border
 mainFrame.Parent = mainGui
 
 -- Add UICorner to main frame
 local cornerMain = Instance.new("UICorner")
-cornerMain.CornerRadius = UDim.new(0, 10)  -- Adjust corner radius as needed
+cornerMain.CornerRadius = UDim.new(0, 10)  -- Rounded corners
 cornerMain.Parent = mainFrame
 
 -- Create Timer Frame
 local timerFrame = Instance.new("Frame")
 timerFrame.Name = "TimerFrame"
 timerFrame.Size = UDim2.new(0, 200, 0, 50) -- Smaller size to fit within the main frame
-timerFrame.Position = UDim2.new(0.5, -100, 0.5, -25) -- Centered in the main frame both horizontally and vertically
-timerFrame.AnchorPoint = Vector2.new(0.5, 0.5) -- Anchor point set to the center
+timerFrame.Position = UDim2.new(0.5, 0, 0, 20) -- Position at the top with some padding
+timerFrame.AnchorPoint = Vector2.new(0.5, 0) -- Anchor point set to the center
 timerFrame.BackgroundTransparency = 1 -- Fully transparent background
 timerFrame.BorderSizePixel = 1  -- Set to 1 for a visible border
 timerFrame.BorderColor3 = Color3.fromRGB(255, 255, 255)  -- White color for border
@@ -42,40 +42,70 @@ timerFrame.Parent = mainFrame
 
 -- Add UICorner to timer frame
 local cornerTimer = Instance.new("UICorner")
-cornerTimer.CornerRadius = UDim.new(0, 15)  -- More rounded corners for a slightly oval shape
+cornerTimer.CornerRadius = UDim.new(0, 10)  -- Rounded corners
 cornerTimer.Parent = timerFrame
 
--- Timer Script Integration
+-- Timer Label
 local timerLabel = Instance.new("TextLabel")
 timerLabel.Name = "TimerLabel"
 timerLabel.Parent = timerFrame
-timerLabel.Size = UDim2.new(1, -20, 1, -20) -- Make it smaller inside the frame to give it padding
-timerLabel.Position = UDim2.new(0.5, 0, 0.5, 0)
-timerLabel.AnchorPoint = Vector2.new(0.5, 0.5) -- Center in the frame
+timerLabel.Size = UDim2.new(1, 0, 1, 0) -- Full size inside the frame
 timerLabel.BackgroundTransparency = 1 -- Fully transparent background
 timerLabel.TextColor3 = Color3.new(1, 1, 1) -- White text
 timerLabel.Font = Enum.Font.SourceSansBold
 timerLabel.TextScaled = true
 timerLabel.Text = "00:00" -- Initial text
 
--- Define the path to the Timer TextLabel
-local timerTextPath = workspace:WaitForChild("Map"):WaitForChild("Van"):WaitForChild("Van")
-                        :WaitForChild("TimerModel"):WaitForChild("Monitor")
-                        :WaitForChild("SurfaceGui"):WaitForChild("Timer")
+-- Create Script 2 Frame
+local script2Frame = Instance.new("Frame")
+script2Frame.Name = "Script2Frame"
+script2Frame.Size = UDim2.new(0, 200, 0, 150) -- Size for script 2 frame
+script2Frame.Position = UDim2.new(0.5, 0, 0, 90) -- Position below the timer frame
+script2Frame.AnchorPoint = Vector2.new(0.5, 0) -- Anchor point set to the center
+script2Frame.BackgroundTransparency = 1 -- Fully transparent background
+script2Frame.BorderSizePixel = 1  -- Set to 1 for a visible border
+script2Frame.BorderColor3 = Color3.fromRGB(255, 255, 255)  -- White color for border
+script2Frame.Parent = mainFrame
 
--- Function to update the time on the screen
-local function updateTime()
-    while true do
-        if timerTextPath and timerTextPath:IsA("TextLabel") then
-            timerLabel.Text = timerTextPath.Text -- Update the ScreenGui label text with the timer's text
-        else
-            warn("Timer TextLabel not found or is not a TextLabel instance")
-        end
-        wait(1) -- Wait for 1 second before updating again
-    end
-end
+-- Add UICorner to Script 2 frame
+local cornerScript2 = Instance.new("UICorner")
+cornerScript2.CornerRadius = UDim.new(0, 10)  -- Rounded corners
+cornerScript2.Parent = script2Frame
 
--- Start the time update loop without blocking the script
-spawn(updateTime)
+-- Script 2 Label
+local script2Label = Instance.new("TextLabel")
+script2Label.Name = "Script2Label"
+script2Label.Parent = script2Frame
+script2Label.Size = UDim2.new(1, 0, 1, 0) -- Full size inside the frame
+script2Label.BackgroundTransparency = 1 -- Fully transparent background
+script2Label.TextColor3 = Color3.new(1, 1, 1) -- White text
+script2Label.Font = Enum.Font.SourceSansBold
+script2Label.TextScaled = true
+script2Label.Text = "Script 2"
 
-print("check 2")
+-- Create Script 3 Frame
+local script3Frame = Instance.new("Frame")
+script3Frame.Name = "Script3Frame"
+script3Frame.Size = UDim2.new(0, 200, 0, 50) -- Size for script 3 frame
+script3Frame.Position = UDim2.new(0.5, 0, 0, 260) -- Position below script 2 frame
+script3Frame.AnchorPoint = Vector2.new(0.5, 0) -- Anchor point set to the center
+script3Frame.BackgroundTransparency = 1 -- Fully transparent background
+script3Frame.BorderSizePixel = 1  -- Set to 1 for a visible border
+script3Frame.BorderColor3 = Color3.fromRGB(255, 255, 255)  -- White color for border
+script3Frame.Parent = mainFrame
+
+-- Add UICorner to Script 3 frame
+local cornerScript3 = Instance.new("UICorner")
+cornerScript3.CornerRadius = UDim.new(0, 10)  -- Rounded corners
+cornerScript3.Parent = script3Frame
+
+-- Script 3 Label
+local script3Label = Instance.new("TextLabel")
+script3Label.Name = "Script3Label"
+script3Label.Parent = script3Frame
+script3Label.Size = UDim2.new(1, 0, 1, 0) -- Full size inside the frame
+script3Label.BackgroundTransparency = 1 -- Fully transparent background
+script3Label.TextColor3 = Color3.new(1, 1, 1) -- White text
+script3Label.Font = Enum.Font.SourceSansBold
+script3Label.TextScaled = true
+script3Label.Text = "Script 3"
