@@ -32,6 +32,24 @@ tempLabel.Font = Enum.Font.SourceSansBold
 tempLabel.TextScaled = true
 tempLabel.Text = "Temperature: N/A" -- Initial text
 
+-- Create a new ScreenGui for the freezing notification
+local notifyScreenGui = Instance.new("ScreenGui")
+notifyScreenGui.Name = "FreezingNotifyGui"
+notifyScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+
+-- Create a TextLabel to display the freezing notification
+local notifyLabel = Instance.new("TextLabel")
+notifyLabel.Name = "NotifyLabel"
+notifyLabel.Parent = notifyScreenGui
+notifyLabel.Size = UDim2.new(0, 200, 0, 40) -- Size for the notification
+notifyLabel.Position = UDim2.new(1, -220, 1, -60) -- Bottom-right corner
+notifyLabel.BackgroundTransparency = 1 -- Fully transparent background
+notifyLabel.TextColor3 = Color3.new(0.68, 0.85, 1) -- Light blue text
+notifyLabel.Font = Enum.Font.SourceSansBold
+notifyLabel.TextScaled = true
+notifyLabel.Text = "" -- Initial text (empty)
+notifyLabel.Visible = false -- Initially invisible
+
 -- Path to the Zones folder
 local zonesFolder = workspace:WaitForChild("Map"):WaitForChild("Zones")
 local player = game.Players.LocalPlayer
@@ -39,6 +57,7 @@ local character = player.Character or player.CharacterAdded:Wait()
 local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
 
 local currentZone = nil
+local monitoring = false
 
 -- Function to update the zone display
 local function updateZoneDisplay(zoneName)
@@ -53,31 +72,50 @@ end
 local function updateTemperatureDisplay(temperature)
     if temperature then
         tempLabel.Text = "Temperature: " .. tostring(temperature) .. "°C"
+        -- Check if temperature is below freezing and notify
+        if temperature < 0.10 then
+            notifyLabel.Text = "Freezing Evidence Detected!"
+            notifyLabel.Visible = true
+        else
+            notifyLabel.Visible = false
+        end
     else
         tempLabel.Text = "Temperature: N/A"
+        notifyLabel.Visible = false
     end
 end
 
--- Function to handle when the player enters a zone
-local function onZoneTouched(otherPart, zone)
-    if otherPart.Parent == character then
-        currentZone = zone.Name
-        updateZoneDisplay(currentZone)
-
-        -- Now find the temperature directly in the current zone
+-- Function to continuously update the temperature while in the zone
+local function monitorTemperature(zone)
+    monitoring = true
+    while currentZone == zone.Name and monitoring do
         local temperatureObject = zone:FindFirstChild("_____Temperature")
         local temperature = nil
         if temperatureObject and temperatureObject:IsA("NumberValue") then
             temperature = temperatureObject.Value
         end
-
         updateTemperatureDisplay(temperature)
+        wait(1) -- Update temperature every second
+    end
+end
+
+-- Function to handle when the player enters a zone
+local function onZoneTouched(otherPart, zone)
+    if otherPart.Parent == character and currentZone ~= zone.Name then
+        currentZone = zone.Name
+        updateZoneDisplay(currentZone)
+        if not monitoring then
+            spawn(function()
+                monitorTemperature(zone)
+            end)
+        end
     end
 end
 
 -- Function to handle when the player leaves a zone
 local function onZoneTouchEnded(otherPart, zone)
     if otherPart.Parent == character and currentZone == zone.Name then
+        monitoring = false -- Stop monitoring temperature
         currentZone = nil
         updateZoneDisplay(nil)
         updateTemperatureDisplay(nil)
