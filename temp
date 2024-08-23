@@ -1,0 +1,104 @@
+-- Create a new ScreenGui for the zone display
+local zoneScreenGui = Instance.new("ScreenGui")
+zoneScreenGui.Name = "ZoneDisplayGui"
+zoneScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+
+-- Create a TextLabel to display the current zone
+local zoneLabel = Instance.new("TextLabel")
+zoneLabel.Name = "ZoneLabel"
+zoneLabel.Parent = zoneScreenGui
+zoneLabel.Size = UDim2.new(0, 150, 0, 30) -- Reduced size
+zoneLabel.Position = UDim2.new(1, -160, 0.05, 0) -- Top-right corner
+zoneLabel.BackgroundTransparency = 1 -- Fully transparent background
+zoneLabel.TextColor3 = Color3.new(1, 1, 1) -- White text
+zoneLabel.Font = Enum.Font.SourceSansBold
+zoneLabel.TextScaled = true
+zoneLabel.Text = "Not in any zone" -- Initial text
+
+-- Create a new ScreenGui for the temperature display
+local tempScreenGui = Instance.new("ScreenGui")
+tempScreenGui.Name = "TempDisplayGui"
+tempScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+
+-- Create a TextLabel to display the current temperature
+local tempLabel = Instance.new("TextLabel")
+tempLabel.Name = "TempLabel"
+tempLabel.Parent = tempScreenGui
+tempLabel.Size = UDim2.new(0, 150, 0, 30) -- Reduced size
+tempLabel.Position = UDim2.new(1, -160, 0.1, 0) -- Below the zone label
+tempLabel.BackgroundTransparency = 1 -- Fully transparent background
+tempLabel.TextColor3 = Color3.new(1, 1, 1) -- White text
+tempLabel.Font = Enum.Font.SourceSansBold
+tempLabel.TextScaled = true
+tempLabel.Text = "Temperature: N/A" -- Initial text
+
+-- Path to the Zones folder
+local zonesFolder = workspace:WaitForChild("Map"):WaitForChild("Zones")
+local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+
+local currentZone = nil
+
+-- Function to update the zone display
+local function updateZoneDisplay(zoneName)
+    if zoneName then
+        zoneLabel.Text = "Current Zone: " .. zoneName
+    else
+        zoneLabel.Text = "Not in any zone"
+    end
+end
+
+-- Function to update the temperature display
+local function updateTemperatureDisplay(temperature)
+    if temperature then
+        tempLabel.Text = "Temperature: " .. tostring(temperature) .. "°C"
+    else
+        tempLabel.Text = "Temperature: N/A"
+    end
+end
+
+-- Function to handle when the player enters a zone
+local function onZoneTouched(otherPart, zone)
+    if otherPart.Parent == character then
+        currentZone = zone.Name
+        updateZoneDisplay(currentZone)
+
+        -- Now find the temperature directly in the current zone
+        local temperatureObject = zone:FindFirstChild("_____Temperature")
+        local temperature = nil
+        if temperatureObject and temperatureObject:IsA("NumberValue") then
+            temperature = temperatureObject.Value
+        end
+
+        updateTemperatureDisplay(temperature)
+    end
+end
+
+-- Function to handle when the player leaves a zone
+local function onZoneTouchEnded(otherPart, zone)
+    if otherPart.Parent == character and currentZone == zone.Name then
+        currentZone = nil
+        updateZoneDisplay(nil)
+        updateTemperatureDisplay(nil)
+    end
+end
+
+-- Set up touched events for each zone
+for _, zone in pairs(zonesFolder:GetChildren()) do
+    if zone:IsA("Part") then
+        zone.Touched:Connect(function(otherPart)
+            onZoneTouched(otherPart, zone)
+        end)
+        zone.TouchEnded:Connect(function(otherPart)
+            onZoneTouchEnded(otherPart, zone)
+        end)
+    elseif zone:IsA("Model") and zone.PrimaryPart then
+        zone.PrimaryPart.Touched:Connect(function(otherPart)
+            onZoneTouched(otherPart, zone)
+        end)
+        zone.PrimaryPart.TouchEnded:Connect(function(otherPart)
+            onZoneTouchEnded(otherPart, zone)
+        end)
+    end
+end
