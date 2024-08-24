@@ -50,6 +50,18 @@ notifyLabel.TextScaled = true
 notifyLabel.Text = "" -- Initial text (empty)
 notifyLabel.Visible = false -- Initially invisible
 
+-- Create a new TextLabel to display the coldest zone
+local coldestZoneLabel = Instance.new("TextLabel")
+coldestZoneLabel.Name = "ColdestZoneLabel"
+coldestZoneLabel.Parent = zoneScreenGui
+coldestZoneLabel.Size = UDim2.new(0, 200, 0, 30)
+coldestZoneLabel.Position = UDim2.new(1, -220, 0.15, 0) -- Below the temperature label
+coldestZoneLabel.BackgroundTransparency = 1
+coldestZoneLabel.TextColor3 = Color3.new(1, 1, 1)
+coldestZoneLabel.Font = Enum.Font.SourceSansBold
+coldestZoneLabel.TextScaled = true
+coldestZoneLabel.Text = "Coldest Zone: N/A" -- Initial text
+
 -- Path to the Zones folder
 local zonesFolder = workspace:WaitForChild("Map"):WaitForChild("Zones")
 local player = game.Players.LocalPlayer
@@ -59,6 +71,8 @@ local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
 local currentZone = nil
 local monitoring = false
 local freezingDetected = false -- Flag to track freezing evidence detection
+local coldestZone = nil
+local lowestTemperature = math.huge -- Start with a high value
 
 -- Function to update the zone display
 local function updateZoneDisplay(zoneName)
@@ -81,6 +95,50 @@ local function updateTemperatureDisplay(temperature)
         end
     else
         tempLabel.Text = "Temperature: N/A"
+    end
+end
+
+-- Function to find the coldest zone and display a billboard
+local function findColdestZone()
+    lowestTemperature = math.huge
+    coldestZone = nil
+    
+    for _, zone in pairs(zonesFolder:GetChildren()) do
+        local temperatureObject = zone:FindFirstChild("_____Temperature")
+        if temperatureObject and temperatureObject:IsA("NumberValue") then
+            local temperature = temperatureObject.Value
+            if temperature < lowestTemperature then
+                lowestTemperature = temperature
+                coldestZone = zone
+            end
+        end
+    end
+
+    if coldestZone then
+        coldestZoneLabel.Text = "Coldest Zone: " .. coldestZone.Name .. " (" .. tostring(lowestTemperature) .. "°C)"
+        
+        -- Create or update the billboard for the coldest zone
+        local billboard = coldestZone:FindFirstChild("FreezingBillboard") or Instance.new("BillboardGui")
+        billboard.Name = "FreezingBillboard"
+        billboard.Adornee = coldestZone.PrimaryPart or coldestZone:FindFirstChildWhichIsA("BasePart")
+        billboard.Size = UDim2.new(0, 200, 0, 50)
+        billboard.StudsOffset = Vector3.new(0, 5, 0)
+        billboard.AlwaysOnTop = true
+        billboard.Parent = coldestZone
+
+        local textLabel = billboard:FindFirstChild("TextLabel") or Instance.new("TextLabel")
+        textLabel.Name = "TextLabel"
+        textLabel.Parent = billboard
+        textLabel.Size = UDim2.new(1, 0, 1, 0)
+        textLabel.BackgroundTransparency = 1
+        textLabel.Font = Enum.Font.SourceSansBold
+        textLabel.TextSize = 24
+        textLabel.TextColor3 = Color3.fromRGB(255, 255, 255) -- White text
+        textLabel.TextStrokeTransparency = 0
+        textLabel.TextYAlignment = Enum.TextYAlignment.Center
+        textLabel.Text = coldestZone.Name .. " Freezing"
+    else
+        coldestZoneLabel.Text = "Coldest Zone: N/A"
     end
 end
 
@@ -140,52 +198,12 @@ for _, zone in pairs(zonesFolder:GetChildren()) do
     end
 end
 
--- Mid----------------------------------------------------------
-
--- Create a ScreenGui and TextButton
-local screenGui = Instance.new("ScreenGui")
-local teleportButton = Instance.new("TextButton")
-
--- Set up the ScreenGui
-screenGui.Name = "TeleportGui"
-screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
-
--- Set up the Teleport Button
-teleportButton.Name = "TeleportButton"
-teleportButton.Parent = screenGui
-teleportButton.Text = "Teleport to Van Spawn"
-teleportButton.Size = UDim2.new(0, 150, 0, 40) -- Smaller button size (150x40 pixels)
-teleportButton.Position = UDim2.new(1, -160, 1, -60) -- Positioned at the bottom-right corner of the screen
-teleportButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0) -- Black color
-teleportButton.BackgroundTransparency = 0.8 -- Almost transparent
-teleportButton.TextColor3 = Color3.new(1, 1, 1) -- White text
-teleportButton.Font = Enum.Font.SourceSansBold
-teleportButton.TextScaled = true
-teleportButton.BorderSizePixel = 2 -- Adds a border
-teleportButton.BorderColor3 = Color3.fromRGB(255, 255, 255) -- White border
-
--- Teleportation Function
-local function teleportPlayer()
-    local gotopartDelay = 0.1
-    local targetPart = workspace:FindFirstChild("Map"):FindFirstChild("Van"):FindFirstChild("SpawnLocation")
-    
-    if targetPart and targetPart:IsA("BasePart") then
-        local speaker = game.Players.LocalPlayer
-        if speaker.Character and speaker.Character:FindFirstChildOfClass('Humanoid') then
-            local humanoid = speaker.Character:FindFirstChildOfClass('Humanoid')
-            if humanoid.SeatPart then
-                humanoid.Sit = false
-                wait(0.1)
-            end
-            wait(gotopartDelay)
-            speaker.Character:WaitForChild("HumanoidRootPart").CFrame = targetPart.CFrame
-        end
-    else
-        warn("Target part not found or is not a BasePart")
+-- Function to continuously find the coldest zone
+spawn(function()
+    while true do
+        findColdestZone()
+        wait(5) -- Update every 5 seconds
     end
-end
-
--- Connect the function to the button's MouseButton1Click event
-teleportButton.MouseButton1Click:Connect(teleportPlayer)
+end)
 
 print("Script V ON💚")
