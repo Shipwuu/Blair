@@ -1,7 +1,40 @@
+-- Get Player's GUI
+local playerGui = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+
+-- Check for existing GUI and destroy if found (to prevent duplication)
+local existingZoneScreenGui = playerGui:FindFirstChild("ZoneDisplayGui")
+if existingZoneScreenGui then
+    existingZoneScreenGui:Destroy()
+end
+
+local existingTempScreenGui = playerGui:FindFirstChild("TempDisplayGui")
+if existingTempScreenGui then
+    existingTempScreenGui:Destroy()
+end
+
+local existingNotifyScreenGui = playerGui:FindFirstChild("FreezingNotifyGui")
+if existingNotifyScreenGui then
+    existingNotifyScreenGui:Destroy()
+end
+
+local existingColdestZoneLabel = playerGui:FindFirstChild("ColdestZoneLabel")
+if existingColdestZoneLabel then
+    existingColdestZoneLabel:Destroy()
+end
+
+-- Check for existing billboards in all zones and destroy if found
+local zonesFolder = workspace:WaitForChild("Map"):WaitForChild("Zones")
+for _, zone in pairs(zonesFolder:GetChildren()) do
+    local existingBillboard = zone:FindFirstChild("FreezingBillboard")
+    if existingBillboard then
+        existingBillboard:Destroy()
+    end
+end
+
 -- Create a new ScreenGui for the zone display
 local zoneScreenGui = Instance.new("ScreenGui")
 zoneScreenGui.Name = "ZoneDisplayGui"
-zoneScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+zoneScreenGui.Parent = playerGui
 
 -- Create a TextLabel to display the current zone
 local zoneLabel = Instance.new("TextLabel")
@@ -18,7 +51,7 @@ zoneLabel.Text = "Not in any zone" -- Initial text
 -- Create a new ScreenGui for the temperature display
 local tempScreenGui = Instance.new("ScreenGui")
 tempScreenGui.Name = "TempDisplayGui"
-tempScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+tempScreenGui.Parent = playerGui
 
 -- Create a TextLabel to display the current temperature
 local tempLabel = Instance.new("TextLabel")
@@ -35,7 +68,7 @@ tempLabel.Text = "Temperature: N/A" -- Initial text
 -- Create a new ScreenGui for the freezing notification
 local notifyScreenGui = Instance.new("ScreenGui")
 notifyScreenGui.Name = "FreezingNotifyGui"
-notifyScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+notifyScreenGui.Parent = playerGui
 
 -- Create a TextLabel to display the freezing notification
 local notifyLabel = Instance.new("TextLabel")
@@ -62,8 +95,6 @@ coldestZoneLabel.Font = Enum.Font.SourceSansBold
 coldestZoneLabel.TextScaled = true
 coldestZoneLabel.Text = "Coldest Zone: N/A" -- Initial text
 
--- Path to the Zones folder
-local zonesFolder = workspace:WaitForChild("Map"):WaitForChild("Zones")
 local player = game.Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
 local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
@@ -206,11 +237,11 @@ for _, zone in pairs(zonesFolder:GetChildren()) do
     end
 end
 
--- Function to continuously find the coldest zone
+-- Continuously find the coldest zone in a non-blocking loop
 spawn(function()
     while true do
         findColdestZone()
-        wait(1) -- Update every second
+        wait(0.2) -- Update every second
     end
 end)
 
