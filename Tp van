@@ -7,6 +7,13 @@ local player = Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
 local HRoot = character:WaitForChild("HumanoidRootPart")
 
+-- Check for existing button and destroy if found (to prevent duplication)
+local playerGui = player:WaitForChild("PlayerGui")
+local existingButtonGui = playerGui:FindFirstChild("EndButtonGui")
+if existingButtonGui then
+    existingButtonGui:Destroy()
+end
+
 -- Save the original position of the player
 local OldPos = HRoot.CFrame
 
@@ -40,5 +47,28 @@ local function findAndInteract()
     end
 end
 
--- Execute the function to find and interact with the ProximityPrompt
-findAndInteract()
+-- Create a ScreenGui for the button
+local buttonGui = Instance.new("ScreenGui")
+buttonGui.Name = "EndButtonGui"
+buttonGui.Parent = playerGui
+buttonGui.ResetOnSpawn = false
+
+-- Create the button
+local endButton = Instance.new("TextButton")
+endButton.Name = "EndButton"
+endButton.Parent = buttonGui
+endButton.Size = UDim2.new(0, 140, 0, 60) -- Button size (140x60 pixels)
+endButton.Position = UDim2.new(1, -289, 0, 220) -- Positioned just below the specified position
+endButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0) -- Black background color
+endButton.BackgroundTransparency = 0.8 -- Set transparency
+endButton.Text = "End"
+endButton.TextColor3 = Color3.new(1, 1, 1) -- White text color
+endButton.Font = Enum.Font.SourceSansBold
+endButton.TextScaled = true
+
+-- Add UICorner to the button for rounded edges
+local corner = Instance.new("UICorner")
+corner.Parent = endButton
+
+-- Connect button click to execute the function
+endButton.MouseButton1Click:Connect(findAndInteract)
