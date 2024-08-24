@@ -7,65 +7,38 @@ local player = Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
 local HRoot = character:WaitForChild("HumanoidRootPart")
 
--- Variables
+-- Save the original position of the player
 local OldPos = HRoot.CFrame
 
--- Function to find evidence
-local function findEvidence()
-    for i = 1, 2 do
-        local fire = fireproximityprompt or ReplicatedStorage:FindFirstChild("ReportEvidence")
+-- Function to interact with the ProximityPrompt at the specific path
+local function findAndInteract()
+    -- Find the specific ProximityPrompt path
+    local lightSwitchParent = Workspace:FindFirstChild("Map"):FindFirstChild("Van"):FindFirstChild("Van"):FindFirstChild("LeaveButton"):FindFirstChild("LightSwitch")
+    
+    if lightSwitchParent then
+        -- Get the 3rd child which is the proximity prompt in your path
+        local proximityPrompt = lightSwitchParent:GetChildren()[3]
         
-        -- Define the evidence paths
-        local evidencePaths = {
-            Workspace:FindFirstChild("Map"):FindFirstChild("Van"):FindFirstChild("Van"):FindFirstChild("LeaveButton"):FindFirstChild("LightSwitch"):FindFirstChild("ProximityPrompt"),
-            Workspace:FindFirstChild("Map"):FindFirstChild("Van"):FindFirstChild("Van"):FindFirstChild("LeaveButton"):FindFirstChild("LightSwitch"):GetChildren()[3]
-        }
-
-        -- Loop through each path and try to interact with it
-        for _, e in ipairs(evidencePaths) do
-            if e and e:IsA("BasePart") then -- Only interact if e is a BasePart
-                -- Check if interaction is needed
-                local interactionDone = false
-                repeat
-                    pcall(function()
-                        HRoot.CFrame = e.CFrame
-                    end)
-                    wait(0.2)
-                    pcall(function()
-                        if type(fire) == 'function' then
-                            local proximity = e:FindFirstChildOfClass('ProximityPrompt') or e:FindFirstChild('ProximityPrompt')
-                            if proximity then
-                                fire(proximity)
-                                interactionDone = true -- Mark interaction as done
-                            end
-                        elseif fire and fire:IsA("RemoteEvent") then
-                            fire:FireServer(e)
-                            interactionDone = true -- Mark interaction as done
-                        end
-                    end)
-                until interactionDone or not e.Parent or not e or (e:IsA("BasePart") and e.Transparency == 1)
-            elseif e and e:IsA("ProximityPrompt") then -- Handle ProximityPrompt separately
-                -- Check if interaction is needed
-                local interactionDone = false
-                repeat
-                    pcall(function()
-                        HRoot.CFrame = e.Parent.CFrame -- Move to the parent of ProximityPrompt
-                    end)
-                    wait(0.2)
-                    pcall(function()
-                        if fire and fire:IsA("RemoteEvent") then
-                            fire:FireServer(e)
-                            interactionDone = true -- Mark interaction as done
-                        end
-                    end)
-                until interactionDone or not e.Parent or not e
-            end
+        if proximityPrompt and proximityPrompt:IsA("ProximityPrompt") then
+            -- Interaction loop
+            repeat
+                pcall(function()
+                    HRoot.CFrame = proximityPrompt.Parent.CFrame -- Move to the parent of the ProximityPrompt
+                end)
+                wait(0.2)
+                pcall(function()
+                    fireproximityprompt(proximityPrompt) -- Fire the proximity prompt
+                    wait(3) -- Add a 3-second cooldown after interaction
+                    HRoot.CFrame = OldPos -- Return to the original position
+                end)
+            until not proximityPrompt.Parent or not proximityPrompt or not lightSwitchParent:IsDescendantOf(Workspace)
+        else
+            warn("ProximityPrompt not found at the specified path or it is not a ProximityPrompt instance.")
         end
+    else
+        warn("LightSwitch path not found.")
     end
-
-    -- Return to original position
-    HRoot.CFrame = OldPos
 end
 
--- Execute the function
-findEvidence()
+-- Execute the function to find and interact with the ProximityPrompt
+findAndInteract()
