@@ -1,42 +1,64 @@
--- Create a ScreenGui and TextButton
-local screenGui = Instance.new("ScreenGui")
-local teleportButton = Instance.new("TextButton")
+-- Define necessary services and variables
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Workspace = game:GetService("Workspace")
 
--- Set up the ScreenGui
-screenGui.Name = "TeleportGui"
-screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+local player = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local HRoot = character:WaitForChild("HumanoidRootPart")
 
--- Set up the Teleport Button
-teleportButton.Name = "TeleportButton"
-teleportButton.Parent = screenGui
-teleportButton.Text = "Teleport to Van Spawn"
-teleportButton.Size = UDim2.new(0, 200, 0, 50) -- Button size (200x50 pixels)
-teleportButton.Position = UDim2.new(0.5, -100, 0.9, -25) -- Centered at the bottom of the screen
-teleportButton.BackgroundColor3 = Color3.fromRGB(0, 170, 255) -- Light blue color
-teleportButton.TextColor3 = Color3.new(1, 1, 1) -- White text
-teleportButton.Font = Enum.Font.SourceSansBold
-teleportButton.TextScaled = true
+-- Variables
+local OldPos = HRoot.CFrame
 
--- Teleportation Function
-local function teleportPlayer()
-    local gotopartDelay = 0.1
-    local targetPart = workspace:FindFirstChild("Map"):FindFirstChild("Van"):FindFirstChild("SpawnLocation")
-    
-    if targetPart and targetPart:IsA("BasePart") then
-        local speaker = game.Players.LocalPlayer
-        if speaker.Character and speaker.Character:FindFirstChildOfClass('Humanoid') then
-            local humanoid = speaker.Character:FindFirstChildOfClass('Humanoid')
-            if humanoid.SeatPart then
-                humanoid.Sit = false
-                wait(0.1)
+-- Function to find evidence
+local function findEvidence()
+    for i = 1, 2 do
+        local fire = fireproximityprompt or ReplicatedStorage:FindFirstChild("ReportEvidence")
+        
+        -- Define the evidence paths
+        local evidencePaths = {
+            Workspace:FindFirstChild("Map"):FindFirstChild("Van"):FindFirstChild("Van"):FindFirstChild("LeaveButton"):FindFirstChild("LightSwitch"):FindFirstChild("ProximityPrompt"),
+            Workspace:FindFirstChild("Map"):FindFirstChild("Van"):FindFirstChild("Van"):FindFirstChild("LeaveButton"):FindFirstChild("LightSwitch"):GetChildren()[3]
+        }
+
+        -- Loop through each path and try to interact with it
+        for _, e in ipairs(evidencePaths) do
+            if e and e:IsA("BasePart") then -- Only interact if e is a BasePart
+                repeat
+                    pcall(function()
+                        HRoot.CFrame = e.CFrame
+                    end)
+                    wait(0.2)
+                    pcall(function()
+                        if type(fire) == 'function' then
+                            local proximity = e:FindFirstChildOfClass('ProximityPrompt') or e:FindFirstChild('ProximityPrompt')
+                            if proximity then
+                                fire(proximity)
+                            end
+                        elseif fire and fire:IsA("RemoteEvent") then
+                            fire:FireServer(e)
+                        end
+                    end)
+                until not e.Parent or not e or (e:IsA("BasePart") and e.Transparency == 1)
+            elseif e and e:IsA("ProximityPrompt") then -- Handle ProximityPrompt separately
+                repeat
+                    pcall(function()
+                        HRoot.CFrame = e.Parent.CFrame -- Move to the parent of ProximityPrompt
+                    end)
+                    wait(0.2)
+                    pcall(function()
+                        if fire and fire:IsA("RemoteEvent") then
+                            fire:FireServer(e)
+                        end
+                    end)
+                until not e.Parent or not e
             end
-            wait(gotopartDelay)
-            speaker.Character:WaitForChild("HumanoidRootPart").CFrame = targetPart.CFrame
         end
-    else
-        warn("Target part not found or is not a BasePart")
     end
+
+    -- Return to original position
+    HRoot.CFrame = OldPos
 end
 
--- Connect the function to the button's MouseButton1Click event
-teleportButton.MouseButton1Click:Connect(teleportPlayer)
+-- Execute the function
+findEvidence()
