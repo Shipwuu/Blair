@@ -8,7 +8,7 @@ local zoneLabel = Instance.new("TextLabel")
 zoneLabel.Name = "ZoneLabel"
 zoneLabel.Parent = zoneScreenGui
 zoneLabel.Size = UDim2.new(0, 150, 0, 30) -- Reduced size
-zoneLabel.Position = UDim2.new(1, -160, 0.05, 0) -- Top-right corner
+zoneLabel.Position = UDim2.new(0, 10, 0.05, 0) -- Moved to the left side
 zoneLabel.BackgroundTransparency = 1 -- Fully transparent background
 zoneLabel.TextColor3 = Color3.new(1, 1, 1) -- White text
 zoneLabel.Font = Enum.Font.SourceSansBold
@@ -25,11 +25,11 @@ local tempLabel = Instance.new("TextLabel")
 tempLabel.Name = "TempLabel"
 tempLabel.Parent = tempScreenGui
 tempLabel.Size = UDim2.new(0, 150, 0, 30) -- Reduced size
-tempLabel.Position = UDim2.new(1, -160, 0.1, 0) -- Below the zone label
+tempLabel.Position = UDim2.new(0, 10, 0.1, 0) -- Moved to the left side, below the zone label
 tempLabel.BackgroundTransparency = 1 -- Fully transparent background
 tempLabel.TextColor3 = Color3.new(1, 1, 1) -- White text
 tempLabel.Font = Enum.Font.SourceSansBold
-tempLabel.TextScaled = true
+tempLabel.TextSize = 20 -- Increased text size
 tempLabel.Text = "Temperature: N/A" -- Initial text
 
 -- Create a new ScreenGui for the freezing notification
@@ -42,7 +42,7 @@ local notifyLabel = Instance.new("TextLabel")
 notifyLabel.Name = "NotifyLabel"
 notifyLabel.Parent = notifyScreenGui
 notifyLabel.Size = UDim2.new(0, 200, 0, 40) -- Size for the notification
-notifyLabel.Position = UDim2.new(1, -220, 1, -60) -- Bottom-right corner
+notifyLabel.Position = UDim2.new(0, 10, 0.15, 0) -- Moved to the left side, below the temperature label
 notifyLabel.BackgroundTransparency = 1 -- Fully transparent background
 notifyLabel.TextColor3 = Color3.new(0.68, 0.85, 1) -- Light blue text
 notifyLabel.Font = Enum.Font.SourceSansBold
@@ -55,7 +55,7 @@ local coldestZoneLabel = Instance.new("TextLabel")
 coldestZoneLabel.Name = "ColdestZoneLabel"
 coldestZoneLabel.Parent = zoneScreenGui
 coldestZoneLabel.Size = UDim2.new(0, 200, 0, 30)
-coldestZoneLabel.Position = UDim2.new(1, -220, 0.15, 0) -- Below the temperature label
+coldestZoneLabel.Position = UDim2.new(0, 10, 0.2, 0) -- Moved to the left side, below the freezing notification label
 coldestZoneLabel.BackgroundTransparency = 1
 coldestZoneLabel.TextColor3 = Color3.new(1, 1, 1)
 coldestZoneLabel.Font = Enum.Font.SourceSansBold
@@ -118,25 +118,32 @@ local function findColdestZone()
         coldestZoneLabel.Text = "Coldest Zone: " .. coldestZone.Name .. " (" .. tostring(lowestTemperature) .. "°C)"
         
         -- Create or update the billboard for the coldest zone
-        local billboard = coldestZone:FindFirstChild("FreezingBillboard") or Instance.new("BillboardGui")
-        billboard.Name = "FreezingBillboard"
-        billboard.Adornee = coldestZone.PrimaryPart or coldestZone:FindFirstChildWhichIsA("BasePart")
-        billboard.Size = UDim2.new(0, 200, 0, 50)
-        billboard.StudsOffset = Vector3.new(0, 5, 0)
-        billboard.AlwaysOnTop = true
-        billboard.Parent = coldestZone
+        local billboard = coldestZone:FindFirstChild("FreezingBillboard")
+        if not billboard then
+            billboard = Instance.new("BillboardGui")
+            billboard.Name = "FreezingBillboard"
+            billboard.Size = UDim2.new(0, 200, 0, 50)
+            billboard.StudsOffset = Vector3.new(0, 5, 0)
+            billboard.AlwaysOnTop = true
+            billboard.Parent = coldestZone
 
-        local textLabel = billboard:FindFirstChild("TextLabel") or Instance.new("TextLabel")
-        textLabel.Name = "TextLabel"
-        textLabel.Parent = billboard
-        textLabel.Size = UDim2.new(1, 0, 1, 0)
-        textLabel.BackgroundTransparency = 1
-        textLabel.Font = Enum.Font.SourceSansBold
-        textLabel.TextSize = 24
-        textLabel.TextColor3 = Color3.fromRGB(255, 255, 255) -- White text
-        textLabel.TextStrokeTransparency = 0
-        textLabel.TextYAlignment = Enum.TextYAlignment.Center
-        textLabel.Text = coldestZone.Name .. " Freezing"
+            local textLabel = Instance.new("TextLabel")
+            textLabel.Name = "TextLabel"
+            textLabel.Parent = billboard
+            textLabel.Size = UDim2.new(1, 0, 1, 0)
+            textLabel.BackgroundTransparency = 1
+            textLabel.Font = Enum.Font.SourceSansBold
+            textLabel.TextSize = 32 -- Large text size for visibility
+            textLabel.TextColor3 = Color3.fromRGB(255, 255, 255) -- White text
+            textLabel.TextStrokeTransparency = 0
+            textLabel.TextYAlignment = Enum.TextYAlignment.Center
+            textLabel.Text = coldestZone.Name .. " Freezing"
+        end
+
+        -- Update the BillboardGui's adornee if it has changed
+        if not billboard.Adornee or billboard.Adornee ~= coldestZone.PrimaryPart then
+            billboard.Adornee = coldestZone.PrimaryPart or coldestZone:FindFirstChildWhichIsA("BasePart")
+        end
     else
         coldestZoneLabel.Text = "Coldest Zone: N/A"
     end
@@ -202,7 +209,7 @@ end
 spawn(function()
     while true do
         findColdestZone()
-        wait(5) -- Update every 5 seconds
+        wait(1) -- Update every second
     end
 end)
 
