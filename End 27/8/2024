@@ -1,0 +1,955 @@
+-- Check if the ScreenGui already exists
+local existingGui = game.Players.LocalPlayer:WaitForChild("PlayerGui"):FindFirstChild("BlairScreenGui")
+if existingGui then
+    existingGui:Destroy() -- Destroy the existing GUI to prevent duplication
+end
+
+-- Creating a new ScreenGui
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "BlairScreenGui"
+screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+
+-- Creating the scrolling frame for Blair GUI
+local mainFrame = Instance.new("ScrollingFrame")
+mainFrame.Name = "MainFrame"
+mainFrame.Parent = screenGui
+mainFrame.AnchorPoint = Vector2.new(0, 0.5)
+mainFrame.Position = UDim2.new(0, 0, 0.5, 0)
+mainFrame.Size = UDim2.new(0.25, 0, 0.25, 0) -- 1/4 of the screen
+mainFrame.CanvasSize = UDim2.new(0, 0, 1.5, 0) -- Adjust this for scrolling
+mainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+mainFrame.BorderSizePixel = 0
+mainFrame.Visible = false -- Start hidden until toggle is pressed
+mainFrame.ScrollBarThickness = 8
+
+-- Adding a title to Blair GUI
+local titleLabel = Instance.new("TextLabel")
+titleLabel.Parent = mainFrame
+titleLabel.Position = UDim2.new(0, 0, 0, 0)
+titleLabel.Size = UDim2.new(1, 0, 0, 50)
+titleLabel.BackgroundTransparency = 1
+titleLabel.Font = Enum.Font.SourceSansBold
+titleLabel.Text = "Blair GUI"
+titleLabel.TextSize = 24
+titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+
+-- Function to create buttons
+local function createButton(name, text, callback)
+    local button = Instance.new("TextButton")
+    button.Name = name
+    button.Parent = mainFrame
+    button.Size = UDim2.new(0.8, 0, 0, 40) -- Reduced button size
+    button.Position = UDim2.new(0.1, 0, 0, 60 + (#mainFrame:GetChildren() - 2) * 50)
+    button.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    button.BorderSizePixel = 0
+    button.TextColor3 = Color3.fromRGB(255, 255, 255)
+    button.Font = Enum.Font.SourceSans
+    button.TextSize = 16 -- Reduced text size
+    button.Text = text
+    button.MouseButton1Click:Connect(callback)
+end
+
+-- Toggle button to show/hide Blair GUI
+local toggleButton = Instance.new("TextButton")
+toggleButton.Name = "ToggleBlairGUIButton"
+toggleButton.Parent = screenGui
+toggleButton.Size = UDim2.new(0, 100, 0, 50)
+toggleButton.Position = UDim2.new(0, 10, 0, 10)
+toggleButton.BackgroundColor3 = Color3.fromRGB(0, 128, 255)
+toggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+toggleButton.Font = Enum.Font.SourceSansBold
+toggleButton.TextSize = 18
+toggleButton.Text = "Toggle GUI"
+toggleButton.Visible = false
+
+toggleButton.MouseButton1Click:Connect(function()
+    mainFrame.Visible = not mainFrame.Visible
+end)
+
+-- Creating the Sanity Check Frame
+local sanityFrame = Instance.new("Frame")
+sanityFrame.Name = "SanityFrame"
+sanityFrame.Parent = screenGui
+sanityFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+sanityFrame.Position = UDim2.new(0.5, 0, 0, 100) -- Positioned in the middle left, slightly down
+sanityFrame.Size = UDim2.new(0, 200, 0, 50)
+sanityFrame.BackgroundTransparency = 0.9 -- Transparent frame
+sanityFrame.BorderSizePixel = 0
+
+-- Adding Sanity Text
+local sanityLabel = Instance.new("TextLabel")
+sanityLabel.Parent = sanityFrame
+sanityLabel.Size = UDim2.new(1, 0, 1, 0)
+sanityLabel.BackgroundTransparency = 1
+sanityLabel.Font = Enum.Font.SourceSansBold
+sanityLabel.TextSize = 20
+sanityLabel.TextColor3 = Color3.fromRGB(255, 255, 255) -- Default to white
+sanityLabel.Text = "Sanity: Loading..."
+sanityLabel.TextStrokeTransparency = 1 -- No outline
+
+-- Function to update Sanity Text continuously
+local player = game:GetService("Players").LocalPlayer
+local sanity = player:WaitForChild("Sanity", 5)
+if sanity then
+    sanity:GetPropertyChangedSignal("Value"):Connect(function()
+        local sanityValue = sanity.Value
+        sanityLabel.Text = "Sanity: " .. sanityValue .. "%"
+
+        -- Change text color based on sanity value
+        if sanityValue >= 100 then
+            sanityLabel.TextColor3 = Color3.new(1, 1, 1) -- White
+        elseif sanityValue >= 50 then
+            sanityLabel.TextColor3 = Color3.fromRGB(255, 165, 0) -- Orange
+        elseif sanityValue >= 10 then
+            sanityLabel.TextColor3 = Color3.fromRGB(255, 0, 0) -- Red
+        else
+            sanityLabel.TextColor3 = Color3.fromRGB(255, 0, 0) -- Red for values below 10%
+        end
+    end)
+else
+    sanityLabel.Text = "Sanity: N/A"
+end
+
+
+-- Function to add billboards to objects
+local function trackObject(object, text, color)
+    if not object:FindFirstChild(text) then
+        local billboard = Instance.new("BillboardGui")
+        billboard.Adornee = object
+        billboard.Name = text
+        billboard.Size = UDim2.new(0, 100, 0, 50)
+        billboard.StudsOffset = Vector3.new(0, 2, 0)
+        billboard.AlwaysOnTop = true
+        billboard.Parent = object
+
+        local textLabel = Instance.new("TextLabel")
+        textLabel.Parent = billboard
+        textLabel.BackgroundTransparency = 1
+        textLabel.Size = UDim2.new(1, 0, 1, 0)
+        textLabel.Font = Enum.Font.SourceSansBold
+        textLabel.TextSize = 14
+        textLabel.TextColor3 = color
+        textLabel.TextStrokeTransparency = 0
+        textLabel.TextYAlignment = Enum.TextYAlignment.Center
+        textLabel.Text = text
+        textLabel.ZIndex = 10
+    end
+end
+
+-- Function to continuously track objects and ensure billboards remain intact
+local function continuousTrack()
+    while true do
+        local map = workspace:FindFirstChild("Map")
+        if map then
+            -- Crused Items
+            local crusedItems = {
+                {name = "Ouija Board", path = game:GetService("Workspace"):FindFirstChild("Ouija Board"), color = Color3.fromRGB(0, 128, 0)},
+                {name = "Summoning Circle", path = game:GetService("Workspace"):FindFirstChild("SummoningCircle"), color = Color3.fromRGB(255, 140, 0)},
+                {name = "Tarot Cards", path = game:GetService("Workspace").Map.Items:FindFirstChild("Tarot Cards"), color = Color3.fromRGB(128, 0, 128)}
+            }
+
+            for _, item in pairs(crusedItems) do
+                if item.path then
+                    trackObject(item.path, item.name, item.color)
+                end
+            end
+
+            -- Track Generators
+            if map:FindFirstChild("Generators") then
+                for _, obj in pairs(map.Generators:GetChildren()) do
+                    if obj.Name == "GeneratorMesh" then
+                        trackObject(obj, "Generator", Color3.fromRGB(255, 0, 0))
+                    end
+                end
+            end
+
+            -- Track Van
+            if map:FindFirstChild("Van") then
+                for _, obj in pairs(map.Van:GetChildren()) do
+                    if obj.Name == "SpawnLocation" then
+                        trackObject(obj, "Van", Color3.fromRGB(255, 20, 147))
+                    end
+                end
+            end
+
+            -- Track Orbs
+            if map:FindFirstChild("Orbs") then
+                for _, obj in pairs(map.Orbs:GetChildren()) do
+                    if obj.Name == "OrbPart" then
+                        trackObject(obj, "Orb", Color3.fromRGB(30, 144, 255))
+                    end
+                end
+            end
+
+            -- Track Prints
+            if map:FindFirstChild("Prints") then
+                for _, obj in pairs(map.Prints:GetChildren()) do
+                    if obj.Name == "UV_Hand" then
+                        trackObject(obj, "Fingerprint", Color3.fromRGB(75, 0, 130))
+                    end
+                end
+            end
+        end
+
+        wait(1) -- Check every 1 second to ensure billboards stay intact
+    end
+end
+
+-- Run the continuous track function
+spawn(continuousTrack)
+
+-- Set up lighting and other environmental effects
+game:GetService("Lighting").Brightness = 2
+game:GetService("Lighting").ClockTime = 0
+game:GetService("Lighting").FogEnd = 100000
+game:GetService("Lighting").GlobalShadows = false
+game:GetService("Lighting").OutdoorAmbient = Color3.fromRGB(128, 128, 128)
+
+print("Script is running")
+
+--[[
+	WARNING: Heads up! This script has not been verified by ScriptBlox. Use at your own risk!
+]]
+for i,v in ipairs(game:GetService("Workspace"):GetDescendants()) do
+ if v.ClassName == "ProximityPrompt" then
+  v.HoldDuration = 0
+ end
+end
+    
+print("INSTANTPPON")
+
+--[[
+	PLAYER ESP
+]]
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local COREGUI = game:GetService("CoreGui")
+local LocalPlayer = Players.LocalPlayer
+
+-- Variables
+local ESPenabled = true  -- Set to true to enable ESP by default
+local espTransparency = 0.4  -- Adjust transparency as needed
+local friends = {}
+
+-- Fetch friends list
+local function updateFriendsList()
+    friends = {}
+    local success, result = pcall(function()
+        return Players:GetFriendsAsync(LocalPlayer.UserId)
+    end)
+    if success then
+        for _, friend in pairs(result:GetCurrentPage()) do
+            friends[friend.Username] = true
+        end
+        print("Friends list updated:", friends)
+    else
+        warn("Failed to fetch friends list:", result)
+    end
+end
+
+-- Initial fetch of the friends list
+updateFriendsList()
+
+-- Utility Functions
+function round(num, numDecimalPlaces)
+    local mult = 10^(numDecimalPlaces or 0)
+    return math.floor(num * mult + 0.5) / mult
+end
+
+function getRoot(char)
+    return char:FindFirstChild("HumanoidRootPart") or char:FindFirstChild("Torso") or char:FindFirstChild("UpperTorso")
+end
+
+function isFriend(plr)
+    return friends[plr.Name] or false
+end
+
+function ESP(plr)
+    task.spawn(function()
+        for i, v in pairs(COREGUI:GetChildren()) do
+            if v.Name == plr.Name .. '_ESP' then
+                v:Destroy()
+            end
+        end
+        wait()
+        if plr.Character and plr.Name ~= Players.LocalPlayer.Name and not COREGUI:FindFirstChild(plr.Name .. '_ESP') then
+            local ESPholder = Instance.new("Folder")
+            ESPholder.Name = plr.Name .. '_ESP'
+            ESPholder.Parent = COREGUI
+            repeat wait(1) until plr.Character and getRoot(plr.Character) and plr.Character:FindFirstChildOfClass("Humanoid")
+            if plr.Character and plr.Character:FindFirstChild('Head') then
+                local BillboardGui = Instance.new("BillboardGui")
+                BillboardGui.Adornee = plr.Character.Head
+                BillboardGui.Name = plr.Name
+                BillboardGui.Parent = ESPholder
+                BillboardGui.Size = UDim2.new(0, 150, 0, 50)
+                BillboardGui.StudsOffset = Vector3.new(0, 1.5, 0)
+                BillboardGui.AlwaysOnTop = true
+
+                local TextLabel1 = Instance.new("TextLabel")
+                TextLabel1.Parent = BillboardGui
+                TextLabel1.BackgroundTransparency = 1
+                TextLabel1.Position = UDim2.new(0, 0, 0, 0)
+                TextLabel1.Size = UDim2.new(0, 150, 0, 25)
+                TextLabel1.Font = Enum.Font.GothamBold
+                TextLabel1.TextSize = 18
+                TextLabel1.TextColor3 = isFriend(plr) and Color3.fromRGB(0, 162, 255) or Color3.new(1, 1, 1)  -- Blue for friends, white for others
+                TextLabel1.TextStrokeTransparency = 0.5
+                TextLabel1.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)  -- Black outline
+                TextLabel1.TextYAlignment = Enum.TextYAlignment.Top
+                TextLabel1.Text = plr.DisplayName .. " (" .. plr.Name .. ")"
+
+                local TextLabel2 = Instance.new("TextLabel")
+                TextLabel2.Parent = BillboardGui
+                TextLabel2.BackgroundTransparency = 1
+                TextLabel2.Position = UDim2.new(0, 0, 0, 20)  -- Close the distance between the name and studs
+                TextLabel2.Size = UDim2.new(0, 150, 0, 25)
+                TextLabel2.Font = Enum.Font.GothamBold
+                TextLabel2.TextSize = 16
+                TextLabel2.TextColor3 = Color3.new(1, 1, 1)
+                TextLabel2.TextStrokeTransparency = 0.5
+                TextLabel2.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)  -- Black outline
+                TextLabel2.TextYAlignment = Enum.TextYAlignment.Top
+
+                local espLoopFunc
+                local teamChange
+                local addedFunc
+                addedFunc = plr.CharacterAdded:Connect(function()
+                    if ESPenabled then
+                        espLoopFunc:Disconnect()
+                        teamChange:Disconnect()
+                        ESPholder:Destroy()
+                        repeat wait(1) until getRoot(plr.Character) and plr.Character:FindFirstChildOfClass("Humanoid")
+                        ESP(plr)
+                        addedFunc:Disconnect()
+                    else
+                        teamChange:Disconnect()
+                        addedFunc:Disconnect()
+                    end
+                end)
+                teamChange = plr:GetPropertyChangedSignal("TeamColor"):Connect(function()
+                    if ESPenabled then
+                        espLoopFunc:Disconnect()
+                        addedFunc:Disconnect()
+                        ESPholder:Destroy()
+                        repeat wait(1) until getRoot(plr.Character) and plr.Character:FindFirstChildOfClass("Humanoid")
+                        ESP(plr)
+                        teamChange:Disconnect()
+                    else
+                        teamChange:Disconnect()
+                    end
+                end)
+                local function espLoop()
+                    if COREGUI:FindFirstChild(plr.Name .. '_ESP') then
+                        if plr.Character and getRoot(plr.Character) and plr.Character:FindFirstChildOfClass("Humanoid") and Players.LocalPlayer.Character and getRoot(Players.LocalPlayer.Character) and Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
+                            local pos = math.floor((getRoot(Players.LocalPlayer.Character).Position - getRoot(plr.Character).Position).magnitude)
+                            TextLabel2.Text = pos .. " studs"  -- Show only the studs distance
+                        end
+                    else
+                        teamChange:Disconnect()
+                        addedFunc:Disconnect()
+                        espLoopFunc:Disconnect()
+                    end
+                end
+                espLoopFunc = RunService.RenderStepped:Connect(espLoop)
+            end
+        end
+    end)
+end
+
+-- Continuously check for new players and update ESP
+RunService.RenderStepped:Connect(function()
+    if ESPenabled then
+        for _, plr in pairs(Players:GetPlayers()) do
+            if not COREGUI:FindFirstChild(plr.Name .. '_ESP') and plr ~= LocalPlayer then
+                ESP(plr)
+            end
+        end
+    end
+end)
+
+-- Automatically apply ESP to new players if enabled
+Players.PlayerAdded:Connect(function(plr)
+    if ESPenabled then
+        ESP(plr)
+    end
+end)
+
+-- Remove ESP when a player leaves the game
+Players.PlayerRemoving:Connect(function(plr)
+    for i, v in pairs(COREGUI:GetChildren()) do
+        if v.Name == plr.Name .. '_ESP' then
+            v:Destroy()
+        end
+    end
+end)
+
+-- Enable ESP by default
+if ESPenabled then
+    for _, plr in pairs(Players:GetPlayers()) do
+        if plr ~= LocalPlayer then
+            ESP(plr)
+        end
+    end
+end
+--[[
+	END PLAYER ESP
+]]
+
+--[[
+    GHOST ESP SCRIPT WITH DYNAMIC DETECTION
+]]
+
+local textColor = Color3.fromRGB(255, 0, 0) -- Red color for the "Ghost" text
+local isTracking = false -- Flag to control the tracking loop
+
+-- Function to create a BillboardGui on a part
+local function addBillboard(part, text)
+    -- Check if the BillboardGui already exists to avoid duplication
+    if part:FindFirstChild("GhostBillboard") then
+        return
+    end
+
+    -- Create BillboardGui
+    local billboard = Instance.new("BillboardGui")
+    billboard.Name = "GhostBillboard"
+    billboard.Adornee = part
+    billboard.Size = UDim2.new(0, 100, 0, 50)
+    billboard.StudsOffset = Vector3.new(0, 3, 0)
+    billboard.AlwaysOnTop = true
+    billboard.Parent = part
+
+    -- Create TextLabel inside BillboardGui
+    local textLabel = Instance.new("TextLabel")
+    textLabel.Parent = billboard
+    textLabel.BackgroundTransparency = 1
+    textLabel.Size = UDim2.new(1, 0, 1, 0)
+    textLabel.Font = Enum.Font.SourceSansBold
+    textLabel.TextSize = 14
+    textLabel.TextColor3 = textColor
+    textLabel.TextStrokeTransparency = 0
+    textLabel.TextYAlignment = Enum.TextYAlignment.Center
+    textLabel.Text = text
+    textLabel.ZIndex = 10
+end
+
+-- Function to continuously check for the Ghost's presence
+local function trackGhost()
+    while true do
+        local ghost = workspace:FindFirstChild("Ghost")
+        
+        if ghost and ghost:FindFirstChild("HumanoidRootPart") then
+            if not isTracking then
+                print("Ghost detected. Starting ESP.")
+                isTracking = true
+                addBillboard(ghost.HumanoidRootPart, "Ghost")
+            end
+        else
+            if isTracking then
+                print("Ghost disappeared. Stopping ESP.")
+                isTracking = false
+                -- Remove existing BillboardGui if the ghost disappears
+                if workspace:FindFirstChild("GhostBillboard") then
+                    workspace:FindFirstChild("GhostBillboard"):Destroy()
+                end
+            end
+        end
+
+        wait(1) -- Check every second
+    end
+end
+
+-- Start the ghost tracking function
+spawn(trackGhost)
+
+print("Script I ON💚")
+--[[
+    END GHOST ESP SCRIPT WITH DYNAMIC DETECTION
+]]
+
+print("Script Done")
+
+local textColorHunting = Color3.fromRGB(255, 255, 0) -- Yellow color for "Hunting" text
+local textColorNone = Color3.fromRGB(255, 255, 255) -- White color for "None" text with slight transparency
+local isTracking = false -- Flag to control the tracking loop
+local spawnCount = 1 -- Counter for ghost spawn billboards
+
+-- Function to create the permanent news screen GUI
+local function createNewsScreen()
+    local playerGui = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+
+    local newsScreen = Instance.new("ScreenGui")
+    newsScreen.Name = "GhostNewsScreen"
+    newsScreen.Parent = playerGui
+    newsScreen.ResetOnSpawn = false
+
+    local displayFrame = Instance.new("Frame")
+    displayFrame.Name = "GhostDisplayFrame"
+    displayFrame.Size = UDim2.new(1, -20, 0, 50)  -- Full width with 10 pixels padding on each side, height of 50 pixels
+    displayFrame.Position = UDim2.new(0, 10, 0, 10)  -- Positioned at the top with a small margin
+    displayFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)  -- Black color for background
+    displayFrame.BackgroundTransparency = 0.8  -- Semi-transparent background
+    displayFrame.BorderSizePixel = 0  -- No border
+    displayFrame.Parent = newsScreen
+
+    local ghostLabel = Instance.new("TextLabel")
+    ghostLabel.Name = "GhostLabel"
+    ghostLabel.Size = UDim2.new(1, 0, 1, 0)
+    ghostLabel.BackgroundTransparency = 1
+    ghostLabel.Font = Enum.Font.SourceSansBold -- Bold font for visibility
+    ghostLabel.TextSize = 24 -- Increased text size for readability
+    ghostLabel.Text = "Ghost: None" -- Default text
+    ghostLabel.TextColor3 = textColorNone
+    ghostLabel.TextTransparency = 0.3  -- Slight transparency for "None" text
+    ghostLabel.TextStrokeTransparency = 0
+    ghostLabel.TextXAlignment = Enum.TextXAlignment.Center
+    ghostLabel.TextYAlignment = Enum.TextYAlignment.Center
+    ghostLabel.Parent = displayFrame
+
+    return ghostLabel, displayFrame -- Return both the ghostLabel and displayFrame
+end
+
+-- Function to create a BillboardGui on a part with spawn count text
+local function addSpawnBillboard(part, spawnNumber)
+    -- Create BillboardGui
+    local billboard = Instance.new("BillboardGui")
+    billboard.Name = "GhostBillboard" .. spawnNumber
+    billboard.Adornee = part
+    billboard.Size = UDim2.new(0, 150, 0, 50)
+    billboard.StudsOffset = Vector3.new(0, 5, 0)
+    billboard.AlwaysOnTop = true
+    billboard.Parent = part
+
+    -- Create TextLabel inside BillboardGui
+    local textLabel = Instance.new("TextLabel")
+    textLabel.Parent = billboard
+    textLabel.BackgroundTransparency = 1
+    textLabel.Size = UDim2.new(1, 0, 1, 0)
+    textLabel.Font = Enum.Font.SourceSansBold -- Bold font for visibility
+    textLabel.TextSize = 24 -- Increased text size for readability
+    textLabel.TextColor3 = Color3.fromRGB(255, 255, 0) -- Yellow color for spawn indicator
+    textLabel.TextStrokeTransparency = 0
+    textLabel.TextYAlignment = Enum.TextYAlignment.Center
+    textLabel.Text = "Ghost Spawn " .. spawnNumber
+    textLabel.ZIndex = 10
+end
+
+-- Function to continuously check for the Ghost's presence
+local function trackGhost()
+    local ghostLabel, displayFrame = createNewsScreen() -- Create and reference ghostLabel and displayFrame here
+
+    while true do
+        local ghost = workspace:FindFirstChild("Ghost")
+        
+        if ghost then
+            if not isTracking then
+                print("Ghost detected. Starting ESP.")
+                isTracking = true
+                
+                -- Add or update the BillboardGui on the ghost
+                local existingBillboard = ghost:FindFirstChild("GhostBillboard" .. spawnCount)
+                if not existingBillboard then
+                    -- Increment spawn count and add new BillboardGui
+                    spawnCount = spawnCount + 1
+                    addSpawnBillboard(ghost, spawnCount - 1) -- Spawn number is the previous count
+                end
+                
+                ghostLabel.Text = "Ghost: Hunting"
+                ghostLabel.TextColor3 = textColorHunting  -- Yellow color when ghost is detected
+                ghostLabel.TextTransparency = 0  -- No transparency for "Hunting" text
+                displayFrame.BackgroundColor3 = Color3.fromRGB(255, 0, 0) -- Red color for background when ghost is detected
+                displayFrame.BackgroundTransparency = 0.6 -- Make the frame slightly more transparent
+            end
+        else
+            if isTracking then
+                print("Ghost disappeared. Stopping ESP.")
+                isTracking = false
+                -- Do not destroy billboards; keep them as is
+            end
+            ghostLabel.Text = "Ghost: None"
+            ghostLabel.TextColor3 = textColorNone  -- White color when no ghost is detected
+            ghostLabel.TextTransparency = 0.3  -- Slight transparency for "None" text
+            displayFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)  -- Reset background to black when no ghost is detected
+            displayFrame.BackgroundTransparency = 0.8 -- Reset to original transparency
+        end
+
+        wait(0.2) -- Check every 0.2 seconds
+    end
+end
+
+-- Start the ghost tracking function
+spawn(trackGhost)
+
+print("Script II ON💚")
+
+-- Initialize a counter to keep track of the number of ghost spawns
+local ghostSpawnCount = 0
+
+-- Function to create a billboard GUI at the ghost's initial spawn position
+local function createBillboard(ghost)
+    ghostSpawnCount = ghostSpawnCount + 1
+
+    -- Create a new part to serve as the marker for the ghost's spawn location
+    local marker = Instance.new("Part")
+    marker.Name = "GhostMarker"
+    marker.Size = Vector3.new(1, 1, 1)
+    marker.Position = ghost.Position
+    marker.Anchored = true
+    marker.CanCollide = false
+    marker.Transparency = 1
+    marker.Parent = workspace
+
+    -- Create a BillboardGui
+    local billboard = Instance.new("BillboardGui")
+    billboard.Name = "GhostBillboard"
+    billboard.Adornee = marker
+    billboard.Size = UDim2.new(10, 0, 5, 0) -- Increase the size of the BillboardGui
+    billboard.StudsOffset = Vector3.new(0, 5, 0) -- Adjust the offset if necessary
+    billboard.AlwaysOnTop = true
+
+    -- Create a TextLabel inside the BillboardGui
+    local textLabel = Instance.new("TextLabel")
+    textLabel.Parent = billboard
+    textLabel.Size = UDim2.new(1, 0, 1, 0)
+    textLabel.Text = "Ghost Spawned: " .. ghostSpawnCount
+    textLabel.TextColor3 = Color3.new(1, 0, 0) -- Red color
+    textLabel.BackgroundTransparency = 0.3 -- Make the background slightly visible
+    textLabel.TextScaled = true
+
+    -- Parent the BillboardGui to the marker part
+    billboard.Parent = marker
+end
+
+-- Function to check if "workspace.Ghost" exists
+local function checkForGhost()
+    while true do
+        wait(1) -- Check every second
+        local ghost = workspace:FindFirstChild("Ghost")
+        if ghost and not workspace:FindFirstChild("GhostMarker") then
+            createBillboard(ghost)
+        end
+    end
+end
+
+-- Execute the check loop
+spawn(checkForGhost)
+
+print("Script III ON💚")
+
+-- Create a new ScreenGui
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "TimerDisplayGui"
+screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+
+-- Create a TextLabel to display the timer
+local timerLabel = Instance.new("TextLabel")
+timerLabel.Name = "TimerLabel"
+timerLabel.Parent = screenGui
+timerLabel.Size = UDim2.new(0, 150, 0, 40) -- Smaller size (150x40 pixels)
+timerLabel.Position = UDim2.new(0, 10, 1, -60) -- Position in the bottom-right corner
+timerLabel.BackgroundTransparency = 1 -- Fully transparent background
+timerLabel.TextColor3 = Color3.new(1, 1, 1) -- White text
+timerLabel.Font = Enum.Font.SourceSansBold
+timerLabel.TextScaled = true
+timerLabel.Text = "00:00" -- Initial text
+
+-- Define the path to the Timer TextLabel
+local timerTextPath = workspace:WaitForChild("Map"):WaitForChild("Van"):WaitForChild("Van")
+                        :WaitForChild("TimerModel"):WaitForChild("Monitor")
+                        :WaitForChild("SurfaceGui"):WaitForChild("Timer")
+
+-- Function to update the time on the screen
+local function updateTime()
+    while true do
+        if timerTextPath and timerTextPath:IsA("TextLabel") then
+            timerLabel.Text = timerTextPath.Text -- Update the ScreenGui label text with the timer's text
+        else
+            warn("Timer TextLabel not found or is not a TextLabel instance")
+        end
+        wait(1) -- Wait for 1 second before updating again
+    end
+end
+
+-- Start the time update loop without blocking the script
+spawn(updateTime)
+
+print("Script IV ON💚")
+
+-- Get Player's GUI
+local playerGui = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+
+-- Check for existing GUI and destroy if found (to prevent duplication)
+local existingZoneScreenGui = playerGui:FindFirstChild("ZoneDisplayGui")
+if existingZoneScreenGui then
+    existingZoneScreenGui:Destroy()
+end
+
+local existingTempScreenGui = playerGui:FindFirstChild("TempDisplayGui")
+if existingTempScreenGui then
+    existingTempScreenGui:Destroy()
+end
+
+local existingNotifyScreenGui = playerGui:FindFirstChild("FreezingNotifyGui")
+if existingNotifyScreenGui then
+    existingNotifyScreenGui:Destroy()
+end
+
+local existingColdestZoneGui = playerGui:FindFirstChild("ColdestZoneGui")
+if existingColdestZoneGui then
+    existingColdestZoneGui:Destroy()
+end
+
+-- Check for existing billboards in all zones and destroy if found
+local zonesFolder = workspace:WaitForChild("Map"):WaitForChild("Zones")
+for _, zone in pairs(zonesFolder:GetChildren()) do
+    local existingBillboard = zone:FindFirstChild("FreezingBillboard")
+    if existingBillboard then
+        existingBillboard:Destroy()
+    end
+end
+
+-- Create a new ScreenGui for the zone display
+local zoneScreenGui = Instance.new("ScreenGui")
+zoneScreenGui.Name = "ZoneDisplayGui"
+zoneScreenGui.Parent = playerGui
+
+-- Create a TextLabel to display the current zone
+local zoneLabel = Instance.new("TextLabel")
+zoneLabel.Name = "ZoneLabel"
+zoneLabel.Parent = zoneScreenGui
+zoneLabel.Size = UDim2.new(0, 150, 0, 30) -- Reduced size
+zoneLabel.Position = UDim2.new(0, 10, 0.05, 0) -- Moved to the left side
+zoneLabel.BackgroundTransparency = 1 -- Fully transparent background
+zoneLabel.TextColor3 = Color3.new(1, 1, 1) -- White text
+zoneLabel.Font = Enum.Font.SourceSansBold
+zoneLabel.TextScaled = true
+zoneLabel.Text = "Not in any zone" -- Initial text
+
+-- Create a new ScreenGui for the temperature display
+local tempScreenGui = Instance.new("ScreenGui")
+tempScreenGui.Name = "TempDisplayGui"
+tempScreenGui.Parent = playerGui
+
+-- Create a TextLabel to display the current temperature
+local tempLabel = Instance.new("TextLabel")
+tempLabel.Name = "TempLabel"
+tempLabel.Parent = tempScreenGui
+tempLabel.Size = UDim2.new(0, 150, 0, 30) -- Reduced size
+tempLabel.Position = UDim2.new(0, 10, 0.1, 0) -- Moved to the left side, below the zone label
+tempLabel.BackgroundTransparency = 1 -- Fully transparent background
+tempLabel.TextColor3 = Color3.new(1, 1, 1) -- White text
+tempLabel.Font = Enum.Font.SourceSansBold
+tempLabel.TextSize = 20 -- Increased text size
+tempLabel.Text = "Temperature: N/A" -- Initial text
+
+-- Create a new ScreenGui for the freezing notification
+local notifyScreenGui = Instance.new("ScreenGui")
+notifyScreenGui.Name = "FreezingNotifyGui"
+notifyScreenGui.Parent = playerGui
+
+-- Create a TextLabel to display the freezing notification
+local notifyLabel = Instance.new("TextLabel")
+notifyLabel.Name = "NotifyLabel"
+notifyLabel.Parent = notifyScreenGui
+notifyLabel.Size = UDim2.new(0, 200, 0, 40) -- Size for the notification
+notifyLabel.Position = UDim2.new(0, 10, 0.15, 0) -- Moved to the left side, below the temperature label
+notifyLabel.BackgroundTransparency = 1 -- Fully transparent background
+notifyLabel.TextColor3 = Color3.new(0.68, 0.85, 1) -- Light blue text
+notifyLabel.Font = Enum.Font.SourceSansBold
+notifyLabel.TextScaled = true
+notifyLabel.Text = "" -- Initial text (empty)
+notifyLabel.Visible = false -- Initially invisible
+
+-- Create a new ScreenGui for displaying the coldest zone
+local coldestZoneGui = Instance.new("ScreenGui")
+coldestZoneGui.Name = "ColdestZoneGui"
+coldestZoneGui.Parent = playerGui
+
+-- Create a TextLabel to display the coldest zone and its temperature
+local coldestZoneLabel = Instance.new("TextLabel")
+coldestZoneLabel.Name = "ColdestZoneLabel"
+coldestZoneLabel.Parent = coldestZoneGui
+coldestZoneLabel.Size = UDim2.new(0, 200, 0, 50) -- Adjust the size as needed
+coldestZoneLabel.Position = UDim2.new(0, 10, 0.1, 95) -- Adjust the position on the left side of the screen
+coldestZoneLabel.BackgroundTransparency = 1 -- Fully transparent background
+coldestZoneLabel.TextColor3 = Color3.new(1, 1, 1) -- White text
+coldestZoneLabel.Font = Enum.Font.SourceSansBold
+coldestZoneLabel.TextScaled = true
+coldestZoneLabel.Text = "Coldest Zone: N/A" -- Initial text
+
+-- Create a TextLabel for freezing temperature notification
+local freezeNotifyLabel = Instance.new("TextLabel")
+freezeNotifyLabel.Name = "FreezeNotifyLabel"
+freezeNotifyLabel.Parent = coldestZoneGui
+freezeNotifyLabel.Size = UDim2.new(0, 200, 0, 50)
+freezeNotifyLabel.Position = UDim2.new(0, 10, 0.15, 0) -- Adjust the position below the coldest zone label
+freezeNotifyLabel.BackgroundTransparency = 1 -- Fully transparent background
+freezeNotifyLabel.TextColor3 = Color3.new(1, 0, 0) -- Red text for freezing notification
+freezeNotifyLabel.Font = Enum.Font.SourceSansBold
+freezeNotifyLabel.TextScaled = true
+freezeNotifyLabel.Text = "Freeze Temp Detected!" -- Initial text for freezing notification
+freezeNotifyLabel.Visible = false -- Initially hidden
+
+local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+
+local currentZone = nil
+local monitoring = false
+local freezingDetected = false -- Flag to track freezing evidence detection
+local coldestZone = nil
+local lowestTemperature = math.huge -- Start with a high value
+
+-- Function to update the zone display
+local function updateZoneDisplay(zoneName)
+    if zoneName then
+        zoneLabel.Text = "Current Zone: " .. zoneName
+    else
+        zoneLabel.Text = "Not in any zone"
+    end
+end
+
+-- Function to update the temperature display
+local function updateTemperatureDisplay(temperature)
+    if temperature then
+        tempLabel.Text = "Temperature: " .. tostring(temperature) .. "°C"
+        -- Check if temperature is below freezing and notify
+        if temperature < 0.10 and not freezingDetected then
+            notifyLabel.Text = "Freezing Evidence Detected!"
+            notifyLabel.Visible = true
+            freezingDetected = true -- Set the flag to true to make notification permanent
+        end
+    else
+        tempLabel.Text = "Temperature: N/A"
+    end
+end
+
+-- Function to find the coldest zone and display a billboard
+local function findColdestZone()
+    while true do
+        local lowestTemperature = math.huge
+        local coldestZone = nil
+        local isFreezing = false
+
+        for _, zone in pairs(zonesFolder:GetChildren()) do
+            local temperatureObject = zone:FindFirstChild("_____Temperature")
+            if temperatureObject and temperatureObject:IsA("NumberValue") then
+                local temperature = temperatureObject.Value
+                if temperature < lowestTemperature then
+                    lowestTemperature = temperature
+                    coldestZone = zone
+                end
+                -- Check for freezing temperature
+                if temperature < 0.10 then
+                    isFreezing = true
+                end
+            end
+        end
+
+        if coldestZone then
+            coldestZoneLabel.Text = "Coldest Zone: " .. coldestZone.Name .. " (" .. string.format("%.2f", lowestTemperature) .. "°C)"
+            
+            -- Display or update the billboard for the coldest zone
+            local billboard = coldestZone:FindFirstChild("FreezingBillboard")
+            if not billboard then
+                billboard = Instance.new("BillboardGui")
+                billboard.Name = "FreezingBillboard"
+                billboard.Size = UDim2.new(0, 200, 0, 50)
+                billboard.StudsOffset = Vector3.new(0, 5, 0)
+                billboard.AlwaysOnTop = true
+
+                local textLabel = Instance.new("TextLabel")
+                textLabel.Name = "TextLabel"
+                textLabel.Parent = billboard
+                textLabel.Size = UDim2.new(1, 0, 1, 0)
+                textLabel.BackgroundTransparency = 1
+                textLabel.Font = Enum.Font.SourceSansBold
+                textLabel.TextSize = 32 -- Large text size for visibility
+                textLabel.TextColor3 = Color3.fromRGB(255, 255, 255) -- White text
+                textLabel.TextStrokeTransparency = 0
+                textLabel.TextYAlignment = Enum.TextYAlignment.Center
+                textLabel.Text = coldestZone.Name .. " Freezing"
+                textLabel.Parent = billboard
+                billboard.Parent = coldestZone
+            end
+
+            -- Check if zone is a Model and has a PrimaryPart, otherwise use the zone itself
+            local billboardAdornee = coldestZone:IsA("Model") and coldestZone.PrimaryPart or coldestZone:FindFirstChildWhichIsA("BasePart") or coldestZone
+            if not billboard.Adornee or billboard.Adornee ~= billboardAdornee then
+                billboard.Adornee = billboardAdornee
+            end
+        else
+            coldestZoneLabel.Text = "Coldest Zone: N/A"
+        end
+
+        -- Display freeze notification if freezing temperature is detected
+        if isFreezing then
+            freezeNotifyLabel.Visible = true
+        else
+            freezeNotifyLabel.Visible = false
+        end
+
+        wait(1) -- Update every second
+    end
+end
+
+-- Function to continuously update the temperature while in the zone
+local function monitorTemperature(zone)
+    monitoring = true
+    while currentZone == zone.Name and monitoring do
+        local temperatureObject = zone:FindFirstChild("_____Temperature")
+        local temperature = nil
+        if temperatureObject and temperatureObject:IsA("NumberValue") then
+            temperature = temperatureObject.Value
+        end
+        updateTemperatureDisplay(temperature)
+        wait(1) -- Update temperature every second
+    end
+end
+
+-- Function to handle when the player enters a zone
+local function onZoneTouched(otherPart, zone)
+    if otherPart.Parent == character and currentZone ~= zone.Name then
+        currentZone = zone.Name
+        updateZoneDisplay(currentZone)
+        if not monitoring then
+            spawn(function()
+                monitorTemperature(zone)
+            end)
+        end
+    end
+end
+
+-- Function to handle when the player leaves a zone
+local function onZoneTouchEnded(otherPart, zone)
+    if otherPart.Parent == character and currentZone == zone.Name then
+        monitoring = false -- Stop monitoring temperature
+        currentZone = nil
+        updateZoneDisplay(nil)
+        updateTemperatureDisplay(nil)
+    end
+end
+
+-- Set up touched events for each zone
+for _, zone in pairs(zonesFolder:GetChildren()) do
+    if zone:IsA("Part") then
+        zone.Touched:Connect(function(otherPart)
+            onZoneTouched(otherPart, zone)
+        end)
+        zone.TouchEnded:Connect(function(otherPart)
+            onZoneTouchEnded(otherPart, zone)
+        end)
+    elseif zone:IsA("Model") and zone.PrimaryPart then
+        zone.PrimaryPart.Touched:Connect(function(otherPart)
+            onZoneTouched(otherPart, zone)
+        end)
+        zone.PrimaryPart.TouchEnded:Connect(function(otherPart)
+            onZoneTouchEnded(otherPart, zone)
+        end)
+    end
+end
+
+-- Start finding the coldest zone in a non-blocking loop
+spawn(findColdestZone)
+
+print("Script V ON💚")
