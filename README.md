@@ -1,2 +1,0 @@
-# Blair
-Blair script
