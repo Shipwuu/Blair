@@ -1,0 +1,29 @@
+-- Automatically create ESP for "HumanoidRootPart" parts
+local espTransparency = 0.5 -- Change this for transparency level (0 = fully opaque, 1 = fully transparent)
+
+-- Function to create ESP adornment
+function createEsp(part)
+    if part:IsA("BasePart") and part.Name == "HumanoidRootPart" then
+        local espBox = Instance.new("BoxHandleAdornment")
+        espBox.Name = part.Name .. "_ESP"
+        espBox.Parent = part
+        espBox.Adornee = part
+        espBox.AlwaysOnTop = true
+        espBox.ZIndex = 0
+        espBox.Size = part.Size
+        espBox.Transparency = espTransparency
+        espBox.Color = BrickColor.new("Lime green")
+    end
+end
+
+-- Loop through existing parts to add ESP on execution
+for _, part in pairs(workspace:GetDescendants()) do
+    createEsp(part)
+end
+
+-- Connect to new parts being added to the workspace
+workspace.DescendantAdded:Connect(function(part)
+    createEsp(part)
+end)
+
+print("Script VI ON💚")
