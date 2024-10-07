@@ -1,5 +1,5 @@
 -- Automatically create ESP for "HumanoidRootPart" parts
-local espTransparency = 0.5 -- Change this for transparency level (0 = fully opaque, 1 = fully transparent)
+local espTransparency = 0.8 -- Change this for transparency level (0 = fully opaque, 1 = fully transparent)
 
 -- Function to create ESP adornment
 function createEsp(part)
