@@ -111,7 +111,7 @@ local toggleButton = Instance.new("TextButton")
 toggleButton.Parent = sanityGui
 toggleButton.Position = UDim2.new(1, -400, 1, -350) -- Bottom right but slightly towards the middle
 toggleButton.Size = UDim2.new(0, 80, 0, 80)
-toggleButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+toggleButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 toggleButton.BackgroundTransparency = 0.8
 toggleButton.Text = "⭕"
 toggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -175,7 +175,7 @@ local function toggleSpeed()
         end
     else
         toggleButton.Text = ""
-        toggleButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0) -- Black transparent
+        toggleButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255) -- Black transparent
         setWalkSpeed(8) -- Reset speed to default when OFF
     end
 end
