@@ -35,6 +35,6 @@ local function deleteDoors()
 end
 
 -- Connect the button click to deleteDoors function
-deleteButton.MouseButton1Click:Connect(deleteDoors
+deleteButton.MouseButton1Click:Connect(deleteDoors)
 
 print("🐢")
