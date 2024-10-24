@@ -1,0 +1,51 @@
+-- Part ESP Script using BillboardGui
+-- Make sure to use Dex or similar tools to get paths to the parts
+
+local function createBillboardGui(part, parentName)
+    -- Create a BillboardGui to attach to the part
+    local billboard = Instance.new("BillboardGui")
+    billboard.Name = "ESP_Billboard"
+    billboard.Adornee = part
+    billboard.Size = UDim2.new(0, 150, 0, 75) -- Adjust size to make it bigger
+    billboard.StudsOffset = Vector3.new(0, 3, 0) -- Offset so it's above the part
+    billboard.AlwaysOnTop = true
+
+    -- Create a TextLabel for the BillboardGui
+    local label = Instance.new("TextLabel")
+    label.Parent = billboard
+    label.Size = UDim2.new(1, 0, 1, 0)
+    label.BackgroundTransparency = 1
+    label.Text = parentName -- Display the name of the parent part
+    label.TextColor3 = Color3.fromRGB(255, 165, 0) -- Orange text color
+    label.TextScaled = false
+    label.TextSize = 20
+    label.Font = Enum.Font.GothamBold -- Set font to GothamBold
+
+    -- Add UIStroke to the label
+    local stroke = Instance.new("UIStroke")
+    stroke.Parent = label
+    stroke.Color = Color3.fromRGB(0, 0, 0) -- Black stroke color
+    stroke.Thickness = 2
+
+    -- Parent the BillboardGui to the part
+    billboard.Parent = part
+end
+
+-- Main Script Execution
+local allParts = game:GetService("Workspace"):GetChildren()
+for _, child in ipairs(allParts) do
+    local base = child:FindFirstChild("base")
+    if base and base:IsA("BasePart") then
+        local proximityPrompt = base:FindFirstChildOfClass("ProximityPrompt")
+        if proximityPrompt then
+            local parentName = child.Name
+            createBillboardGui(base, parentName)
+        else
+            print(child.Name .. " has no ProximityPrompt, skipping BillboardGui creation")
+        end
+    else
+        print(child.Name .. " None")
+    end
+end
+
+print("OPscript✨")
