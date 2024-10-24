@@ -5,3 +5,4 @@ workspace.MothWing
 workspace.PineCone
 workspace.Stick
 workspace.VoodooDoll
+game:GetService("Workspace").Ectoplasm.base
