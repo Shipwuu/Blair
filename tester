@@ -51,7 +51,7 @@ zoneLabel.Text = "Not in any zone" -- Initial text
 -- Adding UIAspectRatioConstraint to zoneLabel to keep aspect ratio consistent
 local zoneLabelAspect = Instance.new("UIAspectRatioConstraint")
 zoneLabelAspect.Parent = zoneLabel
-zoneLabelAspect.AspectRatio = 5 -- Adjust as needed for proper scaling
+zoneLabelAspect.AspectRatio = 15 -- Adjust as needed for proper scaling
 
 -- Create a new ScreenGui for the temperature display
 local tempScreenGui = Instance.new("ScreenGui")
@@ -73,7 +73,7 @@ tempLabel.Text = "Temperature: N/A" -- Initial text
 -- Adding UIAspectRatioConstraint to tempLabel
 local tempLabelAspect = Instance.new("UIAspectRatioConstraint")
 tempLabelAspect.Parent = tempLabel
-tempLabelAspect.AspectRatio = 5 -- Adjust as needed
+tempLabelAspect.AspectRatio = 15 -- Adjust as needed
 
 -- Create a new ScreenGui for the freezing notification
 local notifyScreenGui = Instance.new("ScreenGui")
@@ -96,7 +96,7 @@ notifyLabel.Visible = false -- Initially invisible
 -- Adding UIAspectRatioConstraint to notifyLabel
 local notifyLabelAspect = Instance.new("UIAspectRatioConstraint")
 notifyLabelAspect.Parent = notifyLabel
-notifyLabelAspect.AspectRatio = 5 -- Adjust as needed
+notifyLabelAspect.AspectRatio = 15 -- Adjust as needed
 
 -- Create a new ScreenGui for displaying the coldest zone
 local coldestZoneGui = Instance.new("ScreenGui")
@@ -118,7 +118,7 @@ coldestZoneLabel.Text = "Coldest Zone: N/A" -- Initial text
 -- Adding UIAspectRatioConstraint to coldestZoneLabel
 local coldestZoneLabelAspect = Instance.new("UIAspectRatioConstraint")
 coldestZoneLabelAspect.Parent = coldestZoneLabel
-coldestZoneLabelAspect.AspectRatio = 4 -- Adjust as needed
+coldestZoneLabelAspect.AspectRatio = 15 -- Adjust as needed
 
 -- Create a TextLabel for freezing temperature notification
 local freezeNotifyLabel = Instance.new("TextLabel")
@@ -136,7 +136,7 @@ freezeNotifyLabel.Visible = false -- Initially hidden
 -- Adding UIAspectRatioConstraint to freezeNotifyLabel
 local freezeNotifyLabelAspect = Instance.new("UIAspectRatioConstraint")
 freezeNotifyLabelAspect.Parent = freezeNotifyLabel
-freezeNotifyLabelAspect.AspectRatio = 4 -- Adjust as needed
+freezeNotifyLabelAspect.AspectRatio = 15 -- Adjust as needed
 
 -- The rest of the script remains unchanged...
 
@@ -204,7 +204,7 @@ local function findColdestZone()
             if not billboard then
                 billboard = Instance.new("BillboardGui")
                 billboard.Name = "FreezingBillboard"
-                billboard.Size = UDim2.new(0, 200, 0, 50)
+                billboard.Size = UDim2.new(0, 100, 0, 40)
                 billboard.StudsOffset = Vector3.new(0, 5, 0)
                 billboard.AlwaysOnTop = true
 
