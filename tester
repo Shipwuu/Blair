@@ -1,124 +1,47 @@
-local textColorHunting = Color3.fromRGB(255, 255, 0) -- Yellow color for "Hunting" text
-local textColorNone = Color3.fromRGB(255, 255, 255) -- White color for "None" text with slight transparency
-local isTracking = false -- Flag to control the tracking loop
-local spawnCount = 1 -- Counter for ghost spawn billboards
+-- This script creates a new part if the path "Ghost" appears in the Workspace
+-- It will create a transparent part that can be penetrated, positioned near the "Ghost" part
+-- Make sure to execute this using your Roblox Executor
 
--- Function to create the permanent news screen GUI
-local function createNewsScreen()
-    local playerGui = game.Players.LocalPlayer:WaitForChild("PlayerGui")
-
-    local newsScreen = Instance.new("ScreenGui")
-    newsScreen.Name = "GhostNewsScreen"
-    newsScreen.Parent = playerGui
-    newsScreen.ResetOnSpawn = false
-
-    local displayFrame = Instance.new("Frame")
-    displayFrame.Name = "GhostDisplayFrame"
-    displayFrame.Size = UDim2.new(1, -20, 0, 50)  -- Full width with 10 pixels padding on each side, height of 50 pixels
-    displayFrame.Position = UDim2.new(0, 10, 0, 10)  -- Positioned at the top with a small margin
-    displayFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)  -- Black color for background
-    displayFrame.BackgroundTransparency = 0.8  -- Semi-transparent background
-    displayFrame.BorderSizePixel = 0  -- No border
-    displayFrame.Parent = newsScreen
-
-    local ghostLabel = Instance.new("TextLabel")
-    ghostLabel.Name = "GhostLabel"
-    ghostLabel.Size = UDim2.new(1, 0, 1, 0)
-    ghostLabel.BackgroundTransparency = 1
-    ghostLabel.Font = Enum.Font.SourceSansBold -- Bold font for visibility
-    ghostLabel.TextSize = 24 -- Increased text size for readability
-    ghostLabel.Text = "Ghost: None" -- Default text
-    ghostLabel.TextColor3 = textColorNone
-    ghostLabel.TextTransparency = 0.3  -- Slight transparency for "None" text
-    ghostLabel.TextStrokeTransparency = 0
-    ghostLabel.TextXAlignment = Enum.TextXAlignment.Center
-    ghostLabel.TextYAlignment = Enum.TextYAlignment.Center
-    ghostLabel.Parent = displayFrame
-
-    return ghostLabel, displayFrame -- Return both the ghostLabel and displayFrame
-end
-
--- Function to create a BillboardGui on a part with spawn count text
-local function addSpawnBillboard(part, spawnNumber)
-    -- Create BillboardGui
-    local billboard = Instance.new("BillboardGui")
-    billboard.Name = "GhostBillboard"
-    billboard.Adornee = part
-    billboard.Size = UDim2.new(0, 150, 0, 50)
-    billboard.StudsOffset = Vector3.new(0, 5, 0)
-    billboard.AlwaysOnTop = true
-    billboard.Parent = part
-
-    -- Create TextLabel inside BillboardGui
-    local textLabel = Instance.new("TextLabel")
-    textLabel.Parent = billboard
-    textLabel.BackgroundTransparency = 1
-    textLabel.Size = UDim2.new(1, 0, 1, 0)
-    textLabel.Font = Enum.Font.SourceSansBold -- Bold font for visibility
-    textLabel.TextSize = 24 -- Increased text size for readability
-    textLabel.TextColor3 = Color3.fromRGB(255, 255, 0) -- Yellow color for spawn indicator
-    textLabel.TextStrokeTransparency = 0
-    textLabel.TextYAlignment = Enum.TextYAlignment.Center
-    textLabel.Text = "Ghost Spawn " .. spawnNumber
-    textLabel.ZIndex = 10
-end
-
--- Function to create a new part at the ghost's spawn location
-local function createSpawnPart(spawnPosition)
-    local spawnPart = Instance.new("Part")
-    spawnPart.Name = "Ghost Spawn Place"
-    spawnPart.Size = Vector3.new(2, 2, 2)
-    spawnPart.Position = spawnPosition
-    spawnPart.Anchored = true
-    spawnPart.CanCollide = false
-    spawnPart.Transparency = 0.5
-    spawnPart.BrickColor = BrickColor.new("Bright yellow")
-    spawnPart.Parent = workspace
-
-    -- Add a BillboardGui to the spawn part
-    addSpawnBillboard(spawnPart, spawnCount)
-    return spawnPart
-end
-
--- Function to continuously check for the Ghost's presence
-local function trackGhost()
-    local ghostLabel, displayFrame = createNewsScreen() -- Create and reference ghostLabel and displayFrame here
-
-    while true do
-        local ghost = workspace:FindFirstChild("Ghost")
+local function createGhostPart()
+    -- Check if "Ghost" exists in the workspace
+    local ghost = game.Workspace:FindFirstChild("Ghost")
+    if ghost and ghost:FindFirstChild("HumanoidRootPart") then
+        -- Get the position of the Ghost's HumanoidRootPart
+        local ghostPosition = ghost.HumanoidRootPart.Position
         
-        if ghost then
-            if not isTracking then
-                print("Ghost detected. Starting ESP.")
-                isTracking = true
-                
-                -- Create a new part at the ghost's spawn location
-                local spawnPosition = ghost.Position
-                createSpawnPart(spawnPosition)
-                
-                ghostLabel.Text = "Ghost: Hunting"
-                ghostLabel.TextColor3 = textColorHunting  -- Yellow color when ghost is detected
-                ghostLabel.TextTransparency = 0  -- No transparency for "Hunting" text
-                displayFrame.BackgroundColor3 = Color3.fromRGB(255, 0, 0) -- Red color for background when ghost is detected
-                displayFrame.BackgroundTransparency = 0.6 -- Make the frame slightly more transparent
-            end
-        else
-            if isTracking then
-                print("Ghost disappeared. Stopping ESP.")
-                isTracking = false
-            end
-            ghostLabel.Text = "Ghost: None"
-            ghostLabel.TextColor3 = textColorNone  -- White color when no ghost is detected
-            ghostLabel.TextTransparency = 0.3  -- Slight transparency for "None" text
-            displayFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)  -- Reset background to black when no ghost is detected
-            displayFrame.BackgroundTransparency = 0.8 -- Reset to original transparency
-        end
-
-        wait(0.2) -- Check every 0.2 seconds
+        -- Create a new part outside of the "Ghost" part
+        local newPart = Instance.new("Part")
+        newPart.Size = Vector3.new(2, 2, 2) -- Small part size
+        newPart.Transparency = 0.5 -- Semi-transparent
+        newPart.CanCollide = false -- Can be penetrated
+        newPart.Anchored = true
+        newPart.Position = ghostPosition + Vector3.new(5, 0, 5) -- Offset to ensure it doesn't merge with Ghost part
+        newPart.Parent = game.Workspace
+        
+        -- Create a BillboardGui with a TextLabel to make the part identifiable
+        local billboardGui = Instance.new("BillboardGui")
+        billboardGui.Size = UDim2.new(0, 100, 0, 50)
+        billboardGui.Adornee = newPart
+        billboardGui.AlwaysOnTop = true
+        billboardGui.Parent = newPart
+        
+        local textLabel = Instance.new("TextLabel")
+        textLabel.Size = UDim2.new(1, 0, 1, 0)
+        textLabel.Text = "Ghost Detected"
+        textLabel.TextColor3 = Color3.new(1, 0, 0)
+        textLabel.BackgroundTransparency = 1
+        textLabel.Parent = billboardGui
     end
 end
 
--- Start the ghost tracking function
-spawn(trackGhost)
+-- Listen for changes in the Workspace to detect when "Ghost" appears
+game.Workspace.ChildAdded:Connect(function(child)
+    if child.Name == "Ghost" then
+        createGhostPart()
+    end
+end)
 
-print("Script II ON💚")
+-- Initial check in case "Ghost" is already present
+if game.Workspace:FindFirstChild("Ghost") then
+    createGhostPart()
+end
