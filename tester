@@ -42,7 +42,7 @@ end
 local function addSpawnBillboard(part, spawnNumber)
     -- Create BillboardGui
     local billboard = Instance.new("BillboardGui")
-    billboard.Name = "GhostBillboard" .. spawnNumber
+    billboard.Name = "GhostBillboard"
     billboard.Adornee = part
     billboard.Size = UDim2.new(0, 150, 0, 50)
     billboard.StudsOffset = Vector3.new(0, 5, 0)
@@ -63,6 +63,23 @@ local function addSpawnBillboard(part, spawnNumber)
     textLabel.ZIndex = 10
 end
 
+-- Function to create a new part at the ghost's spawn location
+local function createSpawnPart(spawnPosition)
+    local spawnPart = Instance.new("Part")
+    spawnPart.Name = "Ghost Spawn Place"
+    spawnPart.Size = Vector3.new(2, 2, 2)
+    spawnPart.Position = spawnPosition
+    spawnPart.Anchored = true
+    spawnPart.CanCollide = false
+    spawnPart.Transparency = 0.5
+    spawnPart.BrickColor = BrickColor.new("Bright yellow")
+    spawnPart.Parent = workspace
+
+    -- Add a BillboardGui to the spawn part
+    addSpawnBillboard(spawnPart, spawnCount)
+    return spawnPart
+end
+
 -- Function to continuously check for the Ghost's presence
 local function trackGhost()
     local ghostLabel, displayFrame = createNewsScreen() -- Create and reference ghostLabel and displayFrame here
@@ -75,13 +92,9 @@ local function trackGhost()
                 print("Ghost detected. Starting ESP.")
                 isTracking = true
                 
-                -- Add or update the BillboardGui on the ghost
-                local existingBillboard = ghost:FindFirstChild("GhostBillboard" .. spawnCount)
-                if not existingBillboard then
-                    -- Increment spawn count and add new BillboardGui
-                    spawnCount = spawnCount + 1
-                    addSpawnBillboard(ghost, spawnCount - 1) -- Spawn number is the previous count
-                end
+                -- Create a new part at the ghost's spawn location
+                local spawnPosition = ghost.Position
+                createSpawnPart(spawnPosition)
                 
                 ghostLabel.Text = "Ghost: Hunting"
                 ghostLabel.TextColor3 = textColorHunting  -- Yellow color when ghost is detected
@@ -93,7 +106,6 @@ local function trackGhost()
             if isTracking then
                 print("Ghost disappeared. Stopping ESP.")
                 isTracking = false
-                -- Do not destroy billboards; keep them as is
             end
             ghostLabel.Text = "Ghost: None"
             ghostLabel.TextColor3 = textColorNone  -- White color when no ghost is detected
