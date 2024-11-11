@@ -1,7 +1,10 @@
+-- Creating the Sanity Frame
+-- This script extracts the Sanity frame from the given script and manages its behavior
+
 -- Creating the Sanity Check Frame
 local sanityFrame = Instance.new("Frame")
 sanityFrame.Name = "SanityFrame"
-sanityFrame.Parent = screenGui
+sanityFrame.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
 sanityFrame.AnchorPoint = Vector2.new(0.5, 0.5)
 sanityFrame.Position = UDim2.new(0.5, 0, 0, 100) -- Positioned in the middle left, slightly down
 sanityFrame.Size = UDim2.new(0, 200, 0, 50)
