@@ -66,7 +66,7 @@ end
 -- Function to create a new part at the ghost's spawn location
 local function createSpawnPart(spawnPosition)
     local spawnPart = Instance.new("Part")
-    spawnPart.Name = "GhostSpawnPart"
+    spawnPart.Name = "Ghost Spawn Place"
     spawnPart.Size = Vector3.new(2, 2, 2)
     spawnPart.Position = spawnPosition
     spawnPart.Anchored = true
@@ -74,6 +74,9 @@ local function createSpawnPart(spawnPosition)
     spawnPart.Transparency = 0.5
     spawnPart.BrickColor = BrickColor.new("Bright yellow")
     spawnPart.Parent = workspace
+
+    -- Add a BillboardGui to the spawn part
+    addSpawnBillboard(spawnPart, spawnCount)
     return spawnPart
 end
 
@@ -92,7 +95,6 @@ local function trackGhost()
                 -- Create a new part at the ghost's spawn location
                 local spawnPosition = ghost.Position
                 local spawnPart = createSpawnPart(spawnPosition)
-                addSpawnBillboard(spawnPart, spawnCount)
                 spawnCount = spawnCount + 1
                 
                 ghostLabel.Text = "Ghost: Hunting"
