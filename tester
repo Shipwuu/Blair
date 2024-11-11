@@ -15,7 +15,7 @@ local function createNewsScreen()
 
     local displayFrame = Instance.new("Frame")
     displayFrame.Name = "GhostDisplayFrame"
-    displayFrame.Size = UDim2.new(1, -20, 0, 50)  -- Full width with 10 pixels padding on each side, height of 50 pixels
+    displayFrame.Size = UDim2.new(1, -20, 0, 20)  -- Full width with 10 pixels padding on each side, height of 50 pixels
     displayFrame.Position = UDim2.new(0, 10, 0, 10)  -- Positioned at the top with a small margin
     displayFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)  -- Black color for background
     displayFrame.BackgroundTransparency = 0.8  -- Semi-transparent background
@@ -51,7 +51,7 @@ local spawnCount = 1
 local function addSpawnBillboard(part, spawnNumber)
     -- Create BillboardGui
     local billboard = Instance.new("BillboardGui")
-    billboard.Name = "GhostBillboard" .. spawnNumber
+    billboard.Name = "GhostBillboard"
     billboard.Adornee = part
     billboard.Size = UDim2.new(0, 150, 0, 50)
     billboard.StudsOffset = Vector3.new(0, 5, 0)
@@ -84,25 +84,46 @@ local function trackGhost()
                 print("Ghost detected. Starting ESP.")
                 isTracking = true
                 
-                -- Add or update the BillboardGui on the ghost
-                local existingBillboard = ghost:FindFirstChild("GhostBillboard" .. spawnCount)
-                if not existingBillboard then
-                    -- Increment spawn count and add new BillboardGui
-                    spawnCount = spawnCount + 1
-                    addSpawnBillboard(ghost, spawnCount - 1) -- Spawn number is the previous count
+                -- Remove existing BillboardGui if present to prevent duplication
+                local existingBillboard = ghost:FindFirstChild("GhostBillboard")
+                if existingBillboard then
+                    existingBillboard:Destroy()
                 end
+                
+                -- Increment spawn count and add new BillboardGui
+                spawnCount = spawnCount + 1
+                addSpawnBillboard(ghost, spawnCount)
                 
                 ghostLabel.Text = "Ghost: Hunting"
                 ghostLabel.TextColor3 = textColorHunting  -- Yellow color when ghost is detected
                 ghostLabel.TextTransparency = 0  -- No transparency for "Hunting" text
-                displayFrame.BackgroundColor3 = Color3.fromRGB(255, 0, 0) -- Red color for background when ghost is detected
-                displayFrame.BackgroundTransparency = 0.6 -- Make the frame slightly more transparent
+                spawn(function()
+                    while isTracking do
+                        -- Fade in to red
+                        for i = 0, 1, 0.1 do
+                            displayFrame.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+                            displayFrame.BackgroundTransparency = 1 - i
+                            wait(0.05)
+                        end
+
+                        -- Fade out to black
+                        for i = 0, 1, 0.1 do
+                            displayFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+                            displayFrame.BackgroundTransparency = i
+                            wait(0.05)
+                        end
+                    end
+                end)
             end
         else
             if isTracking then
                 print("Ghost disappeared. Stopping ESP.")
                 isTracking = false
-                -- Do not destroy billboards; keep them as is
+                
+                -- Remove existing BillboardGui when ghost disappears
+                if ghostLabel.Parent and ghostLabel.Parent:FindFirstChild("GhostBillboard") then
+                    ghostLabel.Parent:FindFirstChild("GhostBillboard"):Destroy()
+                end
             end
             ghostLabel.Text = "Ghost: None"
             ghostLabel.TextColor3 = textColorNone  -- White color when no ghost is detected
