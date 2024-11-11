@@ -38,26 +38,16 @@ local function createNewsScreen()
     return ghostLabel, displayFrame -- Return both the ghostLabel and displayFrame
 end
 
--- Function to create a BillboardGui on a new part with spawn count text
-local function addSpawnBillboard(spawnPosition, spawnNumber)
-    -- Create a new part to mark the ghost spawn location
-    local spawnPart = Instance.new("Part")
-    spawnPart.Name = "GhostSpawnPart"
-    spawnPart.Size = Vector3.new(1, 1, 1)
-    spawnPart.Position = spawnPosition
-    spawnPart.Anchored = true
-    spawnPart.CanCollide = false
-    spawnPart.Transparency = 1
-    spawnPart.Parent = workspace
-
+-- Function to create a BillboardGui on a part with spawn count text
+local function addSpawnBillboard(part, spawnNumber)
     -- Create BillboardGui
     local billboard = Instance.new("BillboardGui")
     billboard.Name = "GhostBillboard"
-    billboard.Adornee = spawnPart
+    billboard.Adornee = part
     billboard.Size = UDim2.new(0, 150, 0, 50)
     billboard.StudsOffset = Vector3.new(0, 5, 0)
     billboard.AlwaysOnTop = true
-    billboard.Parent = spawnPart
+    billboard.Parent = part
 
     -- Create TextLabel inside BillboardGui
     local textLabel = Instance.new("TextLabel")
@@ -73,6 +63,20 @@ local function addSpawnBillboard(spawnPosition, spawnNumber)
     textLabel.ZIndex = 10
 end
 
+-- Function to create a new part at the ghost's spawn location
+local function createSpawnPart(spawnPosition)
+    local spawnPart = Instance.new("Part")
+    spawnPart.Name = "GhostSpawnPart"
+    spawnPart.Size = Vector3.new(2, 2, 2)
+    spawnPart.Position = spawnPosition
+    spawnPart.Anchored = true
+    spawnPart.CanCollide = false
+    spawnPart.Transparency = 0.5
+    spawnPart.BrickColor = BrickColor.new("Bright yellow")
+    spawnPart.Parent = workspace
+    return spawnPart
+end
+
 -- Function to continuously check for the Ghost's presence
 local function trackGhost()
     local ghostLabel, displayFrame = createNewsScreen() -- Create and reference ghostLabel and displayFrame here
@@ -85,9 +89,10 @@ local function trackGhost()
                 print("Ghost detected. Starting ESP.")
                 isTracking = true
                 
-                -- Add or update the BillboardGui at the ghost's spawn location
+                -- Create a new part at the ghost's spawn location
                 local spawnPosition = ghost.Position
-                addSpawnBillboard(spawnPosition, spawnCount)
+                local spawnPart = createSpawnPart(spawnPosition)
+                addSpawnBillboard(spawnPart, spawnCount)
                 spawnCount = spawnCount + 1
                 
                 ghostLabel.Text = "Ghost: Hunting"
