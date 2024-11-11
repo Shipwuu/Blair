@@ -1,14 +1,20 @@
 -- Creating the Sanity Frame
 -- This script extracts the Sanity frame from the given script and manages its behavior
 
+-- Creating the ScreenGui for the Sanity Frame
+local sanityScreenGui = Instance.new("ScreenGui")
+sanityScreenGui.Name = "SanityScreenGui"
+sanityScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+
 -- Creating the Sanity Check Frame
 local sanityFrame = Instance.new("Frame")
 sanityFrame.Name = "SanityFrame"
-sanityFrame.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+sanityFrame.Parent = sanityScreenGui
 sanityFrame.AnchorPoint = Vector2.new(0.5, 0.5)
-sanityFrame.Position = UDim2.new(0.5, 0, 0, 100) -- Positioned in the middle left, slightly down
+sanityFrame.Position = UDim2.new(0.5, 0, 0.5, 100) -- Positioned in the middle of the screen, slightly down
 sanityFrame.Size = UDim2.new(0, 200, 0, 50)
-sanityFrame.BackgroundTransparency = 0.9 -- Transparent frame
+sanityFrame.BackgroundTransparency = 0.5 -- Reduced transparency to make it more visible
+sanityFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0) -- Added background color for visibility
 sanityFrame.BorderSizePixel = 0
 
 -- Adding Sanity Text
