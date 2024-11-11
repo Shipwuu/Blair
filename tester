@@ -1,47 +1,43 @@
--- This script creates a new part if the path "Ghost" appears in the Workspace
--- It will create a transparent part that can be penetrated, positioned near the "Ghost" part
--- Make sure to execute this using your Roblox Executor
+-- Creating the Sanity Check Frame
+local sanityFrame = Instance.new("Frame")
+sanityFrame.Name = "SanityFrame"
+sanityFrame.Parent = screenGui
+sanityFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+sanityFrame.Position = UDim2.new(0.5, 0, 0, 100) -- Positioned in the middle left, slightly down
+sanityFrame.Size = UDim2.new(0, 200, 0, 50)
+sanityFrame.BackgroundTransparency = 0.9 -- Transparent frame
+sanityFrame.BorderSizePixel = 0
 
-local function createGhostPart()
-    -- Check if "Ghost" exists in the workspace
-    local ghost = game.Workspace:FindFirstChild("Ghost")
-    if ghost and ghost:FindFirstChild("HumanoidRootPart") then
-        -- Get the position of the Ghost's HumanoidRootPart
-        local ghostPosition = ghost.HumanoidRootPart.Position
-        
-        -- Create a new part outside of the "Ghost" part
-        local newPart = Instance.new("Part")
-        newPart.Size = Vector3.new(2, 2, 2) -- Small part size
-        newPart.Transparency = 0.5 -- Semi-transparent
-        newPart.CanCollide = false -- Can be penetrated
-        newPart.Anchored = true
-        newPart.Position = ghostPosition + Vector3.new(5, 0, 5) -- Offset to ensure it doesn't merge with Ghost part
-        newPart.Parent = game.Workspace
-        
-        -- Create a BillboardGui with a TextLabel to make the part identifiable
-        local billboardGui = Instance.new("BillboardGui")
-        billboardGui.Size = UDim2.new(0, 100, 0, 50)
-        billboardGui.Adornee = newPart
-        billboardGui.AlwaysOnTop = true
-        billboardGui.Parent = newPart
-        
-        local textLabel = Instance.new("TextLabel")
-        textLabel.Size = UDim2.new(1, 0, 1, 0)
-        textLabel.Text = "Ghost Detected"
-        textLabel.TextColor3 = Color3.new(1, 0, 0)
-        textLabel.BackgroundTransparency = 1
-        textLabel.Parent = billboardGui
-    end
-end
+-- Adding Sanity Text
+local sanityLabel = Instance.new("TextLabel")
+sanityLabel.Parent = sanityFrame
+sanityLabel.Size = UDim2.new(1, 0, 1, 0)
+sanityLabel.BackgroundTransparency = 1
+sanityLabel.Font = Enum.Font.SourceSansBold
+sanityLabel.TextSize = 20
+sanityLabel.TextColor3 = Color3.fromRGB(255, 255, 255) -- Default to white
+sanityLabel.Text = "Sanity: Loading..."
+sanityLabel.TextStrokeTransparency = 1 -- No outline
 
--- Listen for changes in the Workspace to detect when "Ghost" appears
-game.Workspace.ChildAdded:Connect(function(child)
-    if child.Name == "Ghost" then
-        createGhostPart()
-    end
-end)
+-- Function to update Sanity Text continuously
+local player = game:GetService("Players").LocalPlayer
+local sanity = player:WaitForChild("Sanity", 5)
+if sanity then
+    sanity:GetPropertyChangedSignal("Value"):Connect(function()
+        local sanityValue = sanity.Value
+        sanityLabel.Text = "Sanity: " .. sanityValue .. "%"
 
--- Initial check in case "Ghost" is already present
-if game.Workspace:FindFirstChild("Ghost") then
-    createGhostPart()
+        -- Change text color based on sanity value
+        if sanityValue >= 100 then
+            sanityLabel.TextColor3 = Color3.new(1, 1, 1) -- White
+        elseif sanityValue >= 50 then
+            sanityLabel.TextColor3 = Color3.fromRGB(255, 165, 0) -- Orange
+        elseif sanityValue >= 10 then
+            sanityLabel.TextColor3 = Color3.fromRGB(255, 0, 0) -- Red
+        else
+            sanityLabel.TextColor3 = Color3.fromRGB(255, 0, 0) -- Red for values below 10%
+        end
+    end)
+else
+    sanityLabel.Text = "Sanity: N/A"
 end
