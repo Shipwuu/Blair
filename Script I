@@ -66,14 +66,23 @@ toggleButton.MouseButton1Click:Connect(function()
     mainFrame.Visible = not mainFrame.Visible
 end)
 
+-- Creating the Sanity Frame
+-- This script extracts the Sanity frame from the given script and manages its behavior
+
+-- Creating the ScreenGui for the Sanity Frame
+local sanityScreenGui = Instance.new("ScreenGui")
+sanityScreenGui.Name = "SanityScreenGui"
+sanityScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+
 -- Creating the Sanity Check Frame
 local sanityFrame = Instance.new("Frame")
 sanityFrame.Name = "SanityFrame"
-sanityFrame.Parent = screenGui
+sanityFrame.Parent = sanityScreenGui
 sanityFrame.AnchorPoint = Vector2.new(0.5, 0.5)
-sanityFrame.Position = UDim2.new(0.5, 0, 0, 100) -- Positioned in the middle left, slightly down
+sanityFrame.Position = UDim2.new(0.5, 0, 0, 70) -- Positioned in the middle of the screen, slightly down
 sanityFrame.Size = UDim2.new(0, 200, 0, 50)
-sanityFrame.BackgroundTransparency = 0.9 -- Transparent frame
+sanityFrame.BackgroundTransparency = 1 -- Reduced transparency to make it more visible
+sanityFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0) -- Added background color for visibility
 sanityFrame.BorderSizePixel = 0
 
 -- Adding Sanity Text
@@ -82,7 +91,7 @@ sanityLabel.Parent = sanityFrame
 sanityLabel.Size = UDim2.new(1, 0, 1, 0)
 sanityLabel.BackgroundTransparency = 1
 sanityLabel.Font = Enum.Font.SourceSansBold
-sanityLabel.TextSize = 20
+sanityLabel.TextSize = 17
 sanityLabel.TextColor3 = Color3.fromRGB(255, 255, 255) -- Default to white
 sanityLabel.Text = "Sanity: Loading..."
 sanityLabel.TextStrokeTransparency = 1 -- No outline
@@ -110,6 +119,34 @@ else
     sanityLabel.Text = "Sanity: N/A"
 end
 
+-- Detecting "No Sanity" challenge and updating text with animation
+local function detectNoSanityChallenge()
+    local path = workspace:WaitForChild("Map"):WaitForChild("Van"):WaitForChild("Van"):WaitForChild("TimerModel"):WaitForChild("Monitor"):WaitForChild("SurfaceGui"):FindFirstChild("Challenges")
+    if path and path:FindFirstChild("No Sanity") then
+        -- Animate fade in for the text label
+        sanityLabel.Text = "No Sanity Challenges"
+        sanityLabel.TextColor3 = Color3.fromRGB(255, 0, 0) -- Red text
+        for i = 0, 1, 0.05 do
+            sanityLabel.TextTransparency = 1 - i
+            wait(0.05)
+        end
+
+        -- Wait for 10 seconds
+        wait(10)
+
+        -- Animate fade out for the text label
+        for i = 0, 1, 0.05 do
+            sanityLabel.TextTransparency = i
+            wait(0.05)
+        end
+
+        -- Remove the text
+        sanityLabel.Text = ""
+    end
+end
+
+-- Run the detection function
+detectNoSanityChallenge()
 
 -- Function to add billboards to objects
 local function trackObject(object, text, color)
