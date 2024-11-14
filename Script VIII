@@ -37,7 +37,7 @@ local function animateButtonText()
             wait(0.05)
         end
         
-        wait(2) -- Wait for 2 seconds
+        wait(0.8) -- Wait for 2 seconds
         
         -- Fade out
         for i = 0, 1, 0.05 do
