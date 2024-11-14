@@ -48,6 +48,11 @@ zoneLabel.Font = Enum.Font.SourceSansBold
 zoneLabel.TextScaled = true
 zoneLabel.Text = "Not in any zone" -- Initial text
 
+-- Adding UIAspectRatioConstraint to zoneLabel to keep aspect ratio consistent
+local zoneLabelAspect = Instance.new("UIAspectRatioConstraint")
+zoneLabelAspect.Parent = zoneLabel
+zoneLabelAspect.AspectRatio = 15 -- Adjust as needed for proper scaling
+
 -- Create a new ScreenGui for the temperature display
 local tempScreenGui = Instance.new("ScreenGui")
 tempScreenGui.Name = "TempDisplayGui"
@@ -64,6 +69,11 @@ tempLabel.TextColor3 = Color3.new(1, 1, 1) -- White text
 tempLabel.Font = Enum.Font.SourceSansBold
 tempLabel.TextSize = 20 -- Increased text size
 tempLabel.Text = "Temperature: N/A" -- Initial text
+
+-- Adding UIAspectRatioConstraint to tempLabel
+local tempLabelAspect = Instance.new("UIAspectRatioConstraint")
+tempLabelAspect.Parent = tempLabel
+tempLabelAspect.AspectRatio = 15 -- Adjust as needed
 
 -- Create a new ScreenGui for the freezing notification
 local notifyScreenGui = Instance.new("ScreenGui")
@@ -83,6 +93,11 @@ notifyLabel.TextScaled = true
 notifyLabel.Text = "" -- Initial text (empty)
 notifyLabel.Visible = false -- Initially invisible
 
+-- Adding UIAspectRatioConstraint to notifyLabel
+local notifyLabelAspect = Instance.new("UIAspectRatioConstraint")
+notifyLabelAspect.Parent = notifyLabel
+notifyLabelAspect.AspectRatio = 15 -- Adjust as needed
+
 -- Create a new ScreenGui for displaying the coldest zone
 local coldestZoneGui = Instance.new("ScreenGui")
 coldestZoneGui.Name = "ColdestZoneGui"
@@ -100,6 +115,11 @@ coldestZoneLabel.Font = Enum.Font.SourceSansBold
 coldestZoneLabel.TextScaled = true
 coldestZoneLabel.Text = "Coldest Zone: N/A" -- Initial text
 
+-- Adding UIAspectRatioConstraint to coldestZoneLabel
+local coldestZoneLabelAspect = Instance.new("UIAspectRatioConstraint")
+coldestZoneLabelAspect.Parent = coldestZoneLabel
+coldestZoneLabelAspect.AspectRatio = 15 -- Adjust as needed
+
 -- Create a TextLabel for freezing temperature notification
 local freezeNotifyLabel = Instance.new("TextLabel")
 freezeNotifyLabel.Name = "FreezeNotifyLabel"
@@ -112,6 +132,13 @@ freezeNotifyLabel.Font = Enum.Font.SourceSansBold
 freezeNotifyLabel.TextScaled = true
 freezeNotifyLabel.Text = "Freeze Temp Detected!" -- Initial text for freezing notification
 freezeNotifyLabel.Visible = false -- Initially hidden
+
+-- Adding UIAspectRatioConstraint to freezeNotifyLabel
+local freezeNotifyLabelAspect = Instance.new("UIAspectRatioConstraint")
+freezeNotifyLabelAspect.Parent = freezeNotifyLabel
+freezeNotifyLabelAspect.AspectRatio = 15 -- Adjust as needed
+
+-- The rest of the script remains unchanged...
 
 local player = game.Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
@@ -187,7 +214,7 @@ local function findColdestZone()
                 textLabel.Size = UDim2.new(1, 0, 1, 0)
                 textLabel.BackgroundTransparency = 1
                 textLabel.Font = Enum.Font.SourceSansBold
-                textLabel.TextSize = 32 -- Large text size for visibility
+                textLabel.TextSize = 20 -- Large text size for visibility
                 textLabel.TextColor3 = Color3.fromRGB(255, 255, 255) -- White text
                 textLabel.TextStrokeTransparency = 0
                 textLabel.TextYAlignment = Enum.TextYAlignment.Center
@@ -212,7 +239,14 @@ local function findColdestZone()
             freezeNotifyLabel.Visible = false
         end
 
-        wait(1) -- Update every second
+        -- Reset the billboard every 10 seconds
+        wait(10)
+        for _, zone in pairs(zonesFolder:GetChildren()) do
+            local billboard = zone:FindFirstChild("FreezingBillboard")
+            if billboard then
+                billboard:Destroy()
+            end
+        end
     end
 end
 
