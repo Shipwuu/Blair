@@ -40,8 +40,8 @@ zoneScreenGui.Parent = playerGui
 local zoneLabel = Instance.new("TextLabel")
 zoneLabel.Name = "ZoneLabel"
 zoneLabel.Parent = zoneScreenGui
-zoneLabel.Size = UDim2.new(0, 150, 0, 30) -- Reduced size
-zoneLabel.Position = UDim2.new(0, 10, 0.05, 0) -- Moved to the left side
+zoneLabel.Size = UDim2.new(0, 170, 0, 50) -- Reduced size
+zoneLabel.Position = UDim2.new(0, 20, 0.05, 0) -- Moved to the left side
 zoneLabel.BackgroundTransparency = 1 -- Fully transparent background
 zoneLabel.TextColor3 = Color3.new(1, 1, 1) -- White text
 zoneLabel.Font = Enum.Font.SourceSansBold
@@ -51,7 +51,7 @@ zoneLabel.Text = "Not in any zone" -- Initial text
 -- Adding UIAspectRatioConstraint to zoneLabel to keep aspect ratio consistent
 local zoneLabelAspect = Instance.new("UIAspectRatioConstraint")
 zoneLabelAspect.Parent = zoneLabel
-zoneLabelAspect.AspectRatio = 15 -- Adjust as needed for proper scaling
+zoneLabelAspect.AspectRatio = 9 -- Adjust as needed for proper scaling
 
 -- Create a new ScreenGui for the temperature display
 local tempScreenGui = Instance.new("ScreenGui")
@@ -63,7 +63,7 @@ local tempLabel = Instance.new("TextLabel")
 tempLabel.Name = "TempLabel"
 tempLabel.Parent = tempScreenGui
 tempLabel.Size = UDim2.new(0, 150, 0, 30) -- Reduced size
-tempLabel.Position = UDim2.new(0, 10, 0.1, 0) -- Moved to the left side, below the zone label
+tempLabel.Position = UDim2.new(0, 30, 0.1, 0) -- Moved to the left side, below the zone label
 tempLabel.BackgroundTransparency = 1 -- Fully transparent background
 tempLabel.TextColor3 = Color3.new(1, 1, 1) -- White text
 tempLabel.Font = Enum.Font.SourceSansBold
@@ -73,7 +73,7 @@ tempLabel.Text = "Temperature: N/A" -- Initial text
 -- Adding UIAspectRatioConstraint to tempLabel
 local tempLabelAspect = Instance.new("UIAspectRatioConstraint")
 tempLabelAspect.Parent = tempLabel
-tempLabelAspect.AspectRatio = 15 -- Adjust as needed
+tempLabelAspect.AspectRatio = 9 -- Adjust as needed
 
 -- Create a new ScreenGui for the freezing notification
 local notifyScreenGui = Instance.new("ScreenGui")
@@ -96,7 +96,7 @@ notifyLabel.Visible = false -- Initially invisible
 -- Adding UIAspectRatioConstraint to notifyLabel
 local notifyLabelAspect = Instance.new("UIAspectRatioConstraint")
 notifyLabelAspect.Parent = notifyLabel
-notifyLabelAspect.AspectRatio = 15 -- Adjust as needed
+notifyLabelAspect.AspectRatio = 9 -- Adjust as needed
 
 -- Create a new ScreenGui for displaying the coldest zone
 local coldestZoneGui = Instance.new("ScreenGui")
@@ -118,7 +118,7 @@ coldestZoneLabel.Text = "Coldest Zone: N/A" -- Initial text
 -- Adding UIAspectRatioConstraint to coldestZoneLabel
 local coldestZoneLabelAspect = Instance.new("UIAspectRatioConstraint")
 coldestZoneLabelAspect.Parent = coldestZoneLabel
-coldestZoneLabelAspect.AspectRatio = 15 -- Adjust as needed
+coldestZoneLabelAspect.AspectRatio = 9 -- Adjust as needed
 
 -- Create a TextLabel for freezing temperature notification
 local freezeNotifyLabel = Instance.new("TextLabel")
@@ -136,7 +136,7 @@ freezeNotifyLabel.Visible = false -- Initially hidden
 -- Adding UIAspectRatioConstraint to freezeNotifyLabel
 local freezeNotifyLabelAspect = Instance.new("UIAspectRatioConstraint")
 freezeNotifyLabelAspect.Parent = freezeNotifyLabel
-freezeNotifyLabelAspect.AspectRatio = 15 -- Adjust as needed
+freezeNotifyLabelAspect.AspectRatio = 9 -- Adjust as needed
 
 -- The rest of the script remains unchanged...
 
