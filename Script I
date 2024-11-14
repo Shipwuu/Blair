@@ -132,7 +132,7 @@ local function detectNoSanityChallenge()
         end
 
         -- Wait for 10 seconds
-        wait(3)
+        wait(1)
 
         -- Animate fade out for the text label
         for i = 0, 1, 0.05 do
