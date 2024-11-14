@@ -24,6 +24,34 @@ deleteButton.TextScaled = true
 local cornerDelete = Instance.new("UICorner")
 cornerDelete.Parent = deleteButton
 
+-- Function to animate the button text with fade in and fade out effects
+local function animateButtonText()
+    local texts = {"DELETE", "DOORS"}
+    local currentTextIndex = 1
+    while deleteButton.Parent do
+        deleteButton.Text = texts[currentTextIndex]
+        
+        -- Fade in
+        for i = 0, 1, 0.05 do
+            deleteButton.TextTransparency = 1 - i
+            wait(0.05)
+        end
+        
+        wait(2) -- Wait for 2 seconds
+        
+        -- Fade out
+        for i = 0, 1, 0.05 do
+            deleteButton.TextTransparency = i
+            wait(0.05)
+        end
+        
+        wait(0.1)
+        
+        -- Switch to the next text
+        currentTextIndex = currentTextIndex % #texts + 1
+    end
+end
+
 -- Function to delete all parts named "Doors"
 local function deleteDoors()
     for _, part in pairs(workspace:GetDescendants()) do
@@ -32,7 +60,13 @@ local function deleteDoors()
         end
     end
     print("All parts named 'Doors' have been deleted.")
+    
+    -- Destroy the button after it is pressed
+    deleteButton:Destroy()
 end
+
+-- Start the text animation
+spawn(animateButtonText)
 
 -- Connect the button click to deleteDoors function
 deleteButton.MouseButton1Click:Connect(deleteDoors)
